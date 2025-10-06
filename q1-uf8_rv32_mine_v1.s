@@ -95,13 +95,11 @@ CLZ:
     li t1, 16 #c
 do_while:
     srl t2, a0, t1 #t2 is y
-    beq t2, x0, SHIFT_TO_MUCH
+    beq t2, x0, SHIFT_TOO_MUCH
     sub t0, t0, t1
     add a0, t2, x0
-    j while_det
-SHIFT_TO_MUCH: 
+SHIFT_TOO_MUCH: 
     srli t1, t1, 1
-while_det:
     bne t1, x0, do_while
     sub a0, t0, a0
     jr ra   # jump to ra
