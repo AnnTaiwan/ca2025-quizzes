@@ -1,200 +1,211 @@
 	.file	"q1-vector.c"
 	.text
 	.globl	vector_init
-	.def	vector_init;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_init
+	.type	vector_init, @function
 vector_init:
+.LFB6:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	-8(%rbp), %rax
 	movq	$0, (%rax)
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	$0, 8(%rax)
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	$0, 16(%rax)
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	$0, 24(%rax)
 	nop
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE6:
+	.size	vector_init, .-vector_init
 	.globl	vector_push
-	.def	vector_push;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_push
+	.type	vector_push, @function
 vector_push:
+.LFB7:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$48, %rsp
-	.seh_stackalloc	48
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	subq	$32, %rsp
+	movq	%rdi, -24(%rbp)
+	movq	%rsi, -32(%rbp)
+	movq	-24(%rbp), %rax
 	movq	8(%rax), %rax
 	testq	%rax, %rax
 	jne	.L3
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	$16, 8(%rax)
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	8(%rax), %rax
-	movl	$8, %edx
-	movq	%rax, %rcx
-	call	calloc
+	movl	$8, %esi
+	movq	%rax, %rdi
+	call	calloc@PLT
 	movq	%rax, %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	%rdx, (%rax)
 .L3:
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	24(%rax), %rax
 	testq	%rax, %rax
 	je	.L4
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	24(%rax), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	cmpq	%rax, %rdx
 	jnb	.L4
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	24(%rax), %rax
 	movq	%rax, -8(%rbp)
-	movq	16(%rbp), %rax
-	movq	(%rax), %rdx
-	movq	-8(%rbp), %rax
-	salq	$3, %rax
+	movq	-24(%rbp), %rax
+	movq	(%rax), %rax
+	movq	-8(%rbp), %rdx
+	salq	$3, %rdx
 	addq	%rax, %rdx
-	movq	24(%rbp), %rax
+	movq	-32(%rbp), %rax
 	movq	%rax, (%rdx)
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	$0, 24(%rax)
 	movq	-8(%rbp), %rax
 	jmp	.L5
 .L4:
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	8(%rax), %rax
 	cmpq	%rax, %rdx
 	jne	.L6
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	8(%rax), %rax
 	leaq	(%rax,%rax), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	%rdx, 8(%rax)
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	8(%rax), %rax
 	leaq	0(,%rax,8), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	(%rax), %rax
-	movq	%rax, %rcx
-	call	realloc
-	movq	16(%rbp), %rdx
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	realloc@PLT
+	movq	-24(%rbp), %rdx
 	movq	%rax, (%rdx)
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	8(%rax), %rdx
-	movq	16(%rbp), %rax
-	movq	16(%rax), %rcx
-	movq	%rdx, %rax
-	subq	%rcx, %rax
-	leaq	0(,%rax,8), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
+	movq	16(%rax), %rax
+	subq	%rax, %rdx
+	salq	$3, %rdx
+	movq	-24(%rbp), %rax
 	movq	(%rax), %rcx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	salq	$3, %rax
 	addq	%rcx, %rax
-	movq	%rdx, %r8
-	movl	$0, %edx
-	movq	%rax, %rcx
-	call	memset
+	movl	$0, %esi
+	movq	%rax, %rdi
+	call	memset@PLT
 .L6:
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	(%rax), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	salq	$3, %rax
 	addq	%rax, %rdx
-	movq	24(%rbp), %rax
+	movq	-32(%rbp), %rax
 	movq	%rax, (%rdx)
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	leaq	1(%rax), %rcx
-	movq	16(%rbp), %rdx
+	movq	-24(%rbp), %rdx
 	movq	%rcx, 16(%rdx)
 .L5:
-	addq	$48, %rsp
-	popq	%rbp
+	leave
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE7:
+	.size	vector_push, .-vector_push
 	.globl	vector_pop
-	.def	vector_pop;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_pop
+	.type	vector_pop, @function
 vector_pop:
+.LFB8:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$16, %rsp
-	.seh_stackalloc	16
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -24(%rbp)
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	testq	%rax, %rax
 	jne	.L8
 	movl	$0, %eax
 	jmp	.L9
 .L8:
-	movq	16(%rbp), %rax
-	movq	(%rax), %rcx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
+	movq	(%rax), %rdx
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
-	leaq	-1(%rax), %rdx
-	movq	16(%rbp), %rax
-	movq	%rdx, 16(%rax)
-	movq	16(%rbp), %rax
+	leaq	-1(%rax), %rcx
+	movq	-24(%rbp), %rax
+	movq	%rcx, 16(%rax)
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	salq	$3, %rax
-	addq	%rcx, %rax
+	addq	%rdx, %rax
 	movq	(%rax), %rax
 	movq	%rax, -8(%rbp)
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	(%rax), %rdx
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
 	salq	$3, %rax
 	addq	%rdx, %rax
 	movq	$0, (%rax)
 	movq	-8(%rbp), %rax
 .L9:
-	addq	$16, %rsp
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE8:
+	.size	vector_pop, .-vector_pop
 	.globl	vector_get_at
-	.def	vector_get_at;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_get_at
+	.type	vector_get_at, @function
 vector_get_at:
+.LFB9:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	%rsi, -16(%rbp)
+	movq	-8(%rbp), %rax
 	movq	16(%rax), %rax
-	cmpq	%rax, 24(%rbp)
+	cmpq	%rax, -16(%rbp)
 	jnb	.L11
-	movq	16(%rbp), %rax
-	movq	(%rax), %rdx
-	movq	24(%rbp), %rax
-	salq	$3, %rax
+	movq	-8(%rbp), %rax
+	movq	(%rax), %rax
+	movq	-16(%rbp), %rdx
+	salq	$3, %rdx
 	addq	%rdx, %rax
 	movq	(%rax), %rax
 	jmp	.L13
@@ -202,56 +213,66 @@ vector_get_at:
 	movl	$0, %eax
 .L13:
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE9:
+	.size	vector_get_at, .-vector_get_at
 	.globl	vector_set_at
-	.def	vector_set_at;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_set_at
+	.type	vector_set_at, @function
 vector_set_at:
+.LFB10:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	movq	%r8, 32(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	%rsi, -16(%rbp)
+	movq	%rdx, -24(%rbp)
+	movq	-8(%rbp), %rax
 	movq	16(%rax), %rax
-	cmpq	%rax, 24(%rbp)
+	cmpq	%rax, -16(%rbp)
 	jb	.L15
 	movl	$0, %eax
 	jmp	.L16
 .L15:
-	movq	16(%rbp), %rax
-	movq	(%rax), %rdx
-	movq	24(%rbp), %rax
-	salq	$3, %rax
+	movq	-8(%rbp), %rax
+	movq	(%rax), %rax
+	movq	-16(%rbp), %rdx
+	salq	$3, %rdx
 	addq	%rax, %rdx
-	movq	32(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	%rax, (%rdx)
-	movq	32(%rbp), %rax
+	movq	-24(%rbp), %rax
 .L16:
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE10:
+	.size	vector_set_at, .-vector_set_at
 	.globl	vector_get_end
-	.def	vector_get_end;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_get_end
+	.type	vector_get_end, @function
 vector_get_end:
+.LFB11:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	-8(%rbp), %rax
 	movq	16(%rax), %rax
 	testq	%rax, %rax
 	je	.L18
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	(%rax), %rdx
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	16(%rax), %rax
 	salq	$3, %rax
 	subq	$8, %rax
@@ -262,1382 +283,1688 @@ vector_get_end:
 	movl	$0, %eax
 .L20:
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE11:
+	.size	vector_get_end, .-vector_get_end
 	.globl	vector_delete_at
-	.def	vector_delete_at;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_delete_at
+	.type	vector_delete_at, @function
 vector_delete_at:
+.LFB12:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	%rsi, -16(%rbp)
+	movq	-8(%rbp), %rax
 	movq	16(%rax), %rax
-	cmpq	%rax, 24(%rbp)
+	cmpq	%rax, -16(%rbp)
 	jnb	.L23
-	movq	16(%rbp), %rax
-	movq	(%rax), %rdx
-	movq	24(%rbp), %rax
-	salq	$3, %rax
+	movq	-8(%rbp), %rax
+	movq	(%rax), %rax
+	movq	-16(%rbp), %rdx
+	salq	$3, %rdx
 	addq	%rdx, %rax
 	movq	$0, (%rax)
-	movq	16(%rbp), %rax
-	movq	24(%rbp), %rdx
+	movq	-8(%rbp), %rax
+	movq	-16(%rbp), %rdx
 	movq	%rdx, 24(%rax)
 .L23:
 	nop
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE12:
+	.size	vector_delete_at, .-vector_delete_at
 	.globl	vector_for_each
-	.def	vector_for_each;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_for_each
+	.type	vector_for_each, @function
 vector_for_each:
+.LFB13:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
+	.cfi_def_cfa_register 6
 	subq	$48, %rsp
-	.seh_stackalloc	48
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	movq	%r8, 32(%rbp)
-	cmpq	$0, 24(%rbp)
+	movq	%rdi, -24(%rbp)
+	movq	%rsi, -32(%rbp)
+	movq	%rdx, -40(%rbp)
+	cmpq	$0, -32(%rbp)
 	jne	.L25
 	movl	$0, %eax
 	jmp	.L26
 .L25:
-	movq	$0, -8(%rbp)
+	movq	$0, -16(%rbp)
 	jmp	.L27
 .L30:
-	movq	16(%rbp), %rax
-	movq	(%rax), %rdx
-	movq	-8(%rbp), %rax
-	salq	$3, %rax
+	movq	-24(%rbp), %rax
+	movq	(%rax), %rax
+	movq	-16(%rbp), %rdx
+	salq	$3, %rdx
 	addq	%rdx, %rax
 	movq	(%rax), %rax
 	testq	%rax, %rax
 	je	.L31
-	movq	16(%rbp), %rax
-	movq	(%rax), %rdx
-	movq	-8(%rbp), %rax
-	salq	$3, %rax
+	movq	-24(%rbp), %rax
+	movq	(%rax), %rax
+	movq	-16(%rbp), %rdx
+	salq	$3, %rdx
 	addq	%rdx, %rax
 	movq	(%rax), %rax
-	movq	32(%rbp), %rdx
-	movq	24(%rbp), %r8
-	movq	%rax, %rcx
-	call	*%r8
-	movq	%rax, -16(%rbp)
-	cmpq	$0, -16(%rbp)
+	movq	-40(%rbp), %rdx
+	movq	-32(%rbp), %rcx
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	*%rcx
+	movq	%rax, -8(%rbp)
+	cmpq	$0, -8(%rbp)
 	je	.L29
-	movq	-16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	jmp	.L26
 .L31:
 	nop
 .L29:
-	addq	$1, -8(%rbp)
+	addq	$1, -16(%rbp)
 .L27:
-	movq	16(%rbp), %rax
+	movq	-24(%rbp), %rax
 	movq	16(%rax), %rax
-	cmpq	%rax, -8(%rbp)
+	cmpq	%rax, -16(%rbp)
 	jb	.L30
 	movl	$0, %eax
 .L26:
-	addq	$48, %rsp
-	popq	%rbp
+	leave
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE13:
+	.size	vector_for_each, .-vector_for_each
 	.globl	vector_delete_all
-	.def	vector_delete_all;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_delete_all
+	.type	vector_delete_all, @function
 vector_delete_all:
+.LFB14:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$48, %rsp
-	.seh_stackalloc	48
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	jmp	.L33
-.L34:
-	cmpq	$0, 24(%rbp)
-	je	.L33
+	.cfi_def_cfa_register 6
+	subq	$32, %rsp
+	movq	%rdi, -24(%rbp)
+	movq	%rsi, -32(%rbp)
+	jmp	.L34
+.L35:
+	cmpq	$0, -32(%rbp)
+	je	.L34
 	movq	-8(%rbp), %rax
-	movq	24(%rbp), %rdx
-	movq	%rax, %rcx
+	movq	-32(%rbp), %rdx
+	movq	%rax, %rdi
 	call	*%rdx
-.L33:
-	movq	16(%rbp), %rcx
+.L34:
+	movq	-24(%rbp), %rax
+	movq	%rax, %rdi
 	call	vector_pop
 	movq	%rax, -8(%rbp)
 	cmpq	$0, -8(%rbp)
-	jne	.L34
+	jne	.L35
 	nop
 	nop
-	addq	$48, %rsp
-	popq	%rbp
+	leave
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE14:
+	.size	vector_delete_all, .-vector_delete_all
 	.globl	vector_free
-	.def	vector_free;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_free
+	.type	vector_free, @function
 vector_free:
+.LFB15:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$32, %rsp
-	.seh_stackalloc	32
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movq	%rdi, -8(%rbp)
+	movq	-8(%rbp), %rax
 	movq	(%rax), %rax
 	testq	%rax, %rax
-	je	.L38
-	movq	16(%rbp), %rax
+	je	.L39
+	movq	-8(%rbp), %rax
 	movq	(%rax), %rax
-	movq	%rax, %rcx
-	call	free
-	movq	16(%rbp), %rax
+	movq	%rax, %rdi
+	call	free@PLT
+	movq	-8(%rbp), %rax
 	movq	$0, (%rax)
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	$0, 8(%rax)
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	$0, 16(%rax)
-	movq	16(%rbp), %rax
+	movq	-8(%rbp), %rax
 	movq	$0, 24(%rax)
-	jmp	.L35
-.L38:
+	jmp	.L36
+.L39:
 	nop
-.L35:
-	addq	$32, %rsp
-	popq	%rbp
+.L36:
+	leave
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE15:
+	.size	vector_free, .-vector_free
 	.globl	vector_used
-	.def	vector_used;	.scl	2;	.type	32;	.endef
-	.seh_proc	vector_used
+	.type	vector_used, @function
 vector_used:
+.LFB16:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	16(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	-8(%rbp), %rax
 	movq	16(%rax), %rax
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE16:
+	.size	vector_used, .-vector_used
 	.globl	test_for_each_callback
-	.def	test_for_each_callback;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_for_each_callback
+	.type	test_for_each_callback, @function
 test_for_each_callback:
+.LFB17:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
-	movq	%rdx, 24(%rbp)
-	movq	24(%rbp), %rax
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
+	movq	%rsi, -16(%rbp)
+	movq	-16(%rbp), %rax
 	movl	(%rax), %eax
 	leal	1(%rax), %edx
-	movq	24(%rbp), %rax
+	movq	-16(%rbp), %rax
 	movl	%edx, (%rax)
 	movl	$0, %eax
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
+	.cfi_endproc
+.LFE17:
+	.size	test_for_each_callback, .-test_for_each_callback
 	.globl	test_delete_callback
-	.def	test_delete_callback;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_delete_callback
+	.type	test_delete_callback, @function
 test_delete_callback:
+.LFB18:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movq	%rcx, 16(%rbp)
+	.cfi_def_cfa_register 6
+	movq	%rdi, -8(%rbp)
 	nop
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
-	.section .rdata,"dr"
+	.cfi_endproc
+.LFE18:
+	.size	test_delete_callback, .-test_delete_callback
+	.section	.rodata
 .LC0:
-	.ascii "Testing vector_init... \0"
+	.string	"Testing vector_init... "
 .LC1:
-	.ascii "v.data == NULL\0"
+	.string	"q1-vector.c"
 .LC2:
-	.ascii "q1-vector.c\0"
+	.string	"v.data == NULL"
 .LC3:
-	.ascii "v.size == 0\0"
+	.string	"v.size == 0"
 .LC4:
-	.ascii "v.count == 0\0"
+	.string	"v.count == 0"
 .LC5:
-	.ascii "v.free_slot == 0\0"
+	.string	"v.free_slot == 0"
 .LC6:
-	.ascii "PASSED\0"
+	.string	"PASSED"
 	.text
 	.globl	test_vector_init
-	.def	test_vector_init;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_init
+	.type	test_vector_init, @function
 test_vector_init:
+.LFB19:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$64, %rsp
-	.seh_stackalloc	64
-	.seh_endprologue
+	.cfi_def_cfa_register 6
+	subq	$48, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
 	leaq	.LC0(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
 	call	vector_init
-	movq	-32(%rbp), %rax
-	testq	%rax, %rax
-	je	.L45
-	leaq	.LC1(%rip), %r9
-	leaq	__func__.8(%rip), %r8
-	movl	$157, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L45:
-	movq	-24(%rbp), %rax
+	movq	-48(%rbp), %rax
 	testq	%rax, %rax
 	je	.L46
-	leaq	.LC3(%rip), %r9
-	leaq	__func__.8(%rip), %r8
-	movl	$158, %edx
-	leaq	.LC2(%rip), %rax
+	leaq	__PRETTY_FUNCTION__.8(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
+	movl	$157, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC2(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
 .L46:
-	movq	-16(%rbp), %rax
+	movq	-40(%rbp), %rax
 	testq	%rax, %rax
 	je	.L47
-	leaq	.LC4(%rip), %r9
-	leaq	__func__.8(%rip), %r8
-	movl	$159, %edx
-	leaq	.LC2(%rip), %rax
+	leaq	__PRETTY_FUNCTION__.8(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
+	movl	$158, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC3(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
 .L47:
-	movq	-8(%rbp), %rax
+	movq	-32(%rbp), %rax
 	testq	%rax, %rax
 	je	.L48
-	leaq	.LC5(%rip), %r9
-	leaq	__func__.8(%rip), %r8
-	movl	$160, %edx
-	leaq	.LC2(%rip), %rax
+	leaq	__PRETTY_FUNCTION__.8(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
+	movl	$159, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC4(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
 .L48:
-	leaq	.LC6(%rip), %rax
+	movq	-24(%rbp), %rax
+	testq	%rax, %rax
+	je	.L49
+	leaq	__PRETTY_FUNCTION__.8(%rip), %rax
 	movq	%rax, %rcx
-	call	puts
+	movl	$160, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC5(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L49:
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
 	nop
-	addq	$64, %rsp
-	popq	%rbp
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L50
+	call	__stack_chk_fail@PLT
+.L50:
+	leave
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
-	.section .rdata,"dr"
+	.cfi_endproc
+.LFE19:
+	.size	test_vector_init, .-test_vector_init
+	.section	.rodata
 	.align 8
 .LC7:
-	.ascii "Testing vector_push and vector_pop... \0"
+	.string	"Testing vector_push and vector_pop... "
 .LC8:
-	.ascii "vector_push(&v, &data1) == 0\0"
+	.string	"vector_push(&v, &data1) == 0"
 .LC9:
-	.ascii "vector_used(&v) == 1\0"
+	.string	"vector_used(&v) == 1"
 .LC10:
-	.ascii "vector_push(&v, &data2) == 1\0"
+	.string	"vector_push(&v, &data2) == 1"
 .LC11:
-	.ascii "vector_used(&v) == 2\0"
+	.string	"vector_used(&v) == 2"
 .LC12:
-	.ascii "vector_push(&v, &data3) == 2\0"
+	.string	"vector_push(&v, &data3) == 2"
 .LC13:
-	.ascii "vector_used(&v) == 3\0"
+	.string	"vector_used(&v) == 3"
 .LC14:
-	.ascii "vector_pop(&v) == &data3\0"
+	.string	"vector_pop(&v) == &data3"
 .LC15:
-	.ascii "vector_pop(&v) == &data2\0"
+	.string	"vector_pop(&v) == &data2"
 .LC16:
-	.ascii "vector_pop(&v) == &data1\0"
+	.string	"vector_pop(&v) == &data1"
 .LC17:
-	.ascii "vector_used(&v) == 0\0"
+	.string	"vector_used(&v) == 0"
 .LC18:
-	.ascii "vector_pop(&v) == NULL\0"
+	.string	"vector_pop(&v) == NULL"
 	.text
 	.globl	test_vector_push_pop
-	.def	test_vector_push_pop;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_push_pop
+	.type	test_vector_push_pop, @function
 test_vector_push_pop:
+.LFB20:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
 	leaq	.LC7(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
 	call	vector_init
-	movl	$42, -36(%rbp)
-	movl	$84, -40(%rbp)
-	movl	$126, -44(%rbp)
-	leaq	-36(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
+	movl	$42, -60(%rbp)
+	movl	$84, -56(%rbp)
+	movl	$126, -52(%rbp)
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
 	call	vector_push
 	testl	%eax, %eax
-	je	.L50
-	leaq	.LC8(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$172, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L50:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	cmpq	$1, %rax
-	je	.L51
-	leaq	.LC9(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$173, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L51:
-	leaq	-40(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	cmpl	$1, %eax
 	je	.L52
-	leaq	.LC10(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$175, %edx
-	leaq	.LC2(%rip), %rax
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
+	movl	$172, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC8(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
 .L52:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
 	call	vector_used
-	cmpq	$2, %rax
+	cmpq	$1, %rax
 	je	.L53
-	leaq	.LC11(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$176, %edx
-	leaq	.LC2(%rip), %rax
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
+	movl	$173, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC9(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
 .L53:
-	leaq	-44(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	cmpl	$2, %eax
-	je	.L54
-	leaq	.LC12(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$178, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L54:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	cmpq	$3, %rax
-	je	.L55
-	leaq	.LC13(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$179, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L55:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_pop
-	leaq	-44(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L56
-	leaq	.LC14(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$181, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L56:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	cmpq	$2, %rax
-	je	.L57
-	leaq	.LC11(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$182, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L57:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_pop
-	leaq	-40(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L58
-	leaq	.LC15(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$184, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L58:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	cmpq	$1, %rax
-	je	.L59
-	leaq	.LC9(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$185, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L59:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_pop
-	leaq	-36(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L60
-	leaq	.LC16(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$187, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L60:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	testq	%rax, %rax
-	je	.L61
-	leaq	.LC17(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$188, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L61:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_pop
-	testq	%rax, %rax
-	je	.L62
-	leaq	.LC18(%rip), %r9
-	leaq	__func__.7(%rip), %r8
-	movl	$190, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L62:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-.LC19:
-	.ascii "Testing vector_get_at... \0"
-	.align 8
-.LC20:
-	.ascii "vector_get_at(&v, 0) == &data1\0"
-	.align 8
-.LC21:
-	.ascii "*(int *) vector_get_at(&v, 0) == 10\0"
-	.align 8
-.LC22:
-	.ascii "vector_get_at(&v, 1) == &data2\0"
-	.align 8
-.LC23:
-	.ascii "*(int *) vector_get_at(&v, 1) == 20\0"
-	.align 8
-.LC24:
-	.ascii "vector_get_at(&v, 2) == &data3\0"
-	.align 8
-.LC25:
-	.ascii "*(int *) vector_get_at(&v, 2) == 30\0"
-.LC26:
-	.ascii "vector_get_at(&v, 3) == NULL\0"
-	.align 8
-.LC27:
-	.ascii "vector_get_at(&v, 100) == NULL\0"
-	.text
-	.globl	test_vector_get_at
-	.def	test_vector_get_at;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_get_at
-test_vector_get_at:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
-	leaq	.LC19(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$10, -36(%rbp)
-	movl	$20, -40(%rbp)
-	movl	$30, -44(%rbp)
-	leaq	-36(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-40(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-44(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-32(%rbp), %rax
-	movl	$0, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	leaq	-36(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L64
-	leaq	.LC20(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$208, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L64:
-	leaq	-32(%rbp), %rax
-	movl	$0, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	movl	(%rax), %eax
-	cmpl	$10, %eax
-	je	.L65
-	leaq	.LC21(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$209, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L65:
-	leaq	-32(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	leaq	-40(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L66
-	leaq	.LC22(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$211, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L66:
-	leaq	-32(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	movl	(%rax), %eax
-	cmpl	$20, %eax
-	je	.L67
-	leaq	.LC23(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$212, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L67:
-	leaq	-32(%rbp), %rax
-	movl	$2, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	leaq	-44(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L68
-	leaq	.LC24(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$214, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L68:
-	leaq	-32(%rbp), %rax
-	movl	$2, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	movl	(%rax), %eax
-	cmpl	$30, %eax
-	je	.L69
-	leaq	.LC25(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$215, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L69:
-	leaq	-32(%rbp), %rax
-	movl	$3, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	testq	%rax, %rax
-	je	.L70
-	leaq	.LC26(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$217, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L70:
-	leaq	-32(%rbp), %rax
-	movl	$100, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	testq	%rax, %rax
-	je	.L71
-	leaq	.LC27(%rip), %r9
-	leaq	__func__.6(%rip), %r8
-	movl	$218, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L71:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-.LC28:
-	.ascii "Testing vector_delete_at... \0"
-.LC29:
-	.ascii "v.free_slot == 1\0"
-.LC30:
-	.ascii "vector_get_at(&v, 1) == NULL\0"
-.LC31:
-	.ascii "vector_push(&v, &data4) == 1\0"
-	.align 8
-.LC32:
-	.ascii "vector_get_at(&v, 1) == &data4\0"
-	.align 8
-.LC33:
-	.ascii "*(int *) vector_get_at(&v, 1) == 400\0"
-	.text
-	.globl	test_vector_delete_at
-	.def	test_vector_delete_at;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_delete_at
-test_vector_delete_at:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
-	leaq	.LC28(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$100, -36(%rbp)
-	movl	$200, -40(%rbp)
-	movl	$300, -44(%rbp)
-	movl	$400, -48(%rbp)
-	leaq	-36(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-40(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-44(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-32(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_delete_at
-	movq	-8(%rbp), %rax
-	cmpq	$1, %rax
-	je	.L73
-	leaq	.LC29(%rip), %r9
-	leaq	__func__.5(%rip), %r8
-	movl	$237, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L73:
-	leaq	-32(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	testq	%rax, %rax
-	je	.L74
-	leaq	.LC30(%rip), %r9
-	leaq	__func__.5(%rip), %r8
-	movl	$238, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L74:
-	leaq	-48(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
+	leaq	-56(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
 	call	vector_push
 	cmpl	$1, %eax
-	je	.L75
-	leaq	.LC31(%rip), %r9
-	leaq	__func__.5(%rip), %r8
-	movl	$241, %edx
-	leaq	.LC2(%rip), %rax
+	je	.L54
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
-.L75:
-	movq	-8(%rbp), %rax
-	testq	%rax, %rax
-	je	.L76
-	leaq	.LC5(%rip), %r9
-	leaq	__func__.5(%rip), %r8
-	movl	$242, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L76:
-	leaq	-32(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	leaq	-48(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L77
-	leaq	.LC32(%rip), %r9
-	leaq	__func__.5(%rip), %r8
-	movl	$243, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L77:
-	leaq	-32(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_get_at
-	movl	(%rax), %eax
-	cmpl	$400, %eax
-	je	.L78
-	leaq	.LC33(%rip), %r9
-	leaq	__func__.5(%rip), %r8
-	movl	$244, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L78:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-.LC34:
-	.ascii "Testing vector_for_each... \0"
-.LC35:
-	.ascii "counter == 3\0"
-	.text
-	.globl	test_vector_for_each
-	.def	test_vector_for_each;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_for_each
-test_vector_for_each:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
-	leaq	.LC34(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$1, -36(%rbp)
-	movl	$2, -40(%rbp)
-	movl	$3, -44(%rbp)
-	leaq	-36(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-40(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-44(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	movl	$0, -48(%rbp)
-	leaq	-48(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rdx, %r8
-	leaq	test_for_each_callback(%rip), %rdx
-	movq	%rax, %rcx
-	call	vector_for_each
-	movl	-48(%rbp), %eax
-	cmpl	$3, %eax
-	je	.L80
-	leaq	.LC35(%rip), %r9
-	leaq	__func__.4(%rip), %r8
-	movl	$264, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L80:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-.LC36:
-	.ascii "Testing vector_delete_all... \0"
-	.text
-	.globl	test_vector_delete_all
-	.def	test_vector_delete_all;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_delete_all
-test_vector_delete_all:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
-	leaq	.LC36(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$10, -36(%rbp)
-	movl	$20, -40(%rbp)
-	movl	$30, -44(%rbp)
-	leaq	-36(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-40(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-44(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
+	movl	$175, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC10(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L54:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
 	call	vector_used
-	cmpq	$3, %rax
-	je	.L82
-	leaq	.LC13(%rip), %r9
-	leaq	__func__.3(%rip), %r8
-	movl	$282, %edx
-	leaq	.LC2(%rip), %rax
+	cmpq	$2, %rax
+	je	.L55
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
-.L82:
-	leaq	-32(%rbp), %rax
-	leaq	test_delete_callback(%rip), %rdx
-	movq	%rax, %rcx
-	call	vector_delete_all
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	testq	%rax, %rax
-	je	.L83
-	leaq	.LC17(%rip), %r9
-	leaq	__func__.3(%rip), %r8
-	movl	$285, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L83:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_pop
-	testq	%rax, %rax
-	je	.L84
-	leaq	.LC18(%rip), %r9
-	leaq	__func__.3(%rip), %r8
-	movl	$286, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L84:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-	.align 8
-.LC37:
-	.ascii "Testing vector automatic resize... \0"
-.LC38:
-	.ascii "vector_used(&v) == 100\0"
-.LC39:
-	.ascii "v.size >= 100\0"
-	.align 8
-.LC40:
-	.ascii "(intptr_t) vector_get_at(&v, i) == i\0"
-	.text
-	.globl	test_vector_resize
-	.def	test_vector_resize;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_resize
-test_vector_resize:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
-	leaq	.LC37(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$0, -4(%rbp)
-	jmp	.L86
-.L87:
-	movl	-4(%rbp), %eax
-	cltq
-	movq	%rax, %rdx
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	addl	$1, -4(%rbp)
-.L86:
-	cmpl	$99, -4(%rbp)
-	jle	.L87
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	cmpq	$100, %rax
-	je	.L88
-	leaq	.LC38(%rip), %r9
-	leaq	__func__.2(%rip), %r8
-	movl	$302, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L88:
-	movq	-40(%rbp), %rax
-	cmpq	$99, %rax
-	ja	.L89
-	leaq	.LC39(%rip), %r9
-	leaq	__func__.2(%rip), %r8
-	movl	$303, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L89:
-	movl	$0, -8(%rbp)
-	jmp	.L90
-.L92:
-	movl	-8(%rbp), %eax
-	movslq	%eax, %rdx
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_get_at
-	movq	%rax, %rdx
-	movl	-8(%rbp), %eax
-	cltq
-	cmpq	%rax, %rdx
-	je	.L91
-	leaq	.LC40(%rip), %r9
-	leaq	__func__.2(%rip), %r8
-	movl	$307, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L91:
-	addl	$1, -8(%rbp)
-.L90:
-	cmpl	$99, -8(%rbp)
-	jle	.L92
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-.LC41:
-	.ascii "Testing vector_get_end... \0"
-.LC42:
-	.ascii "vector_get_end(&v) == NULL\0"
-.LC43:
-	.ascii "vector_get_end(&v) == &data1\0"
-.LC44:
-	.ascii "vector_get_end(&v) == &data2\0"
-.LC45:
-	.ascii "vector_get_end(&v) == &data3\0"
-	.text
-	.globl	test_vector_get_end
-	.def	test_vector_get_end;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_get_end
-test_vector_get_end:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$80, %rsp
-	.seh_stackalloc	80
-	.seh_endprologue
-	leaq	.LC41(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$111, -36(%rbp)
-	movl	$222, -40(%rbp)
-	movl	$333, -44(%rbp)
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_get_end
-	testq	%rax, %rax
-	je	.L94
-	leaq	.LC42(%rip), %r9
-	leaq	__func__.1(%rip), %r8
-	movl	$321, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L94:
-	leaq	-36(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_get_end
-	leaq	-36(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L95
-	leaq	.LC43(%rip), %r9
-	leaq	__func__.1(%rip), %r8
-	movl	$324, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L95:
-	leaq	-40(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_get_end
-	leaq	-40(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L96
-	leaq	.LC44(%rip), %r9
-	leaq	__func__.1(%rip), %r8
-	movl	$327, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L96:
-	leaq	-44(%rbp), %rdx
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_push
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_get_end
-	leaq	-44(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L97
-	leaq	.LC45(%rip), %r9
-	leaq	__func__.1(%rip), %r8
-	movl	$330, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L97:
-	leaq	-32(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_free
-	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
-	nop
-	addq	$80, %rsp
-	popq	%rbp
-	ret
-	.seh_endproc
-	.section .rdata,"dr"
-.LC46:
-	.ascii "Testing vector_set_at... \0"
-	.align 8
-.LC47:
-	.ascii "vector_set_at(&v, 1, &data4) == &data4\0"
-	.align 8
-.LC48:
-	.ascii "vector_used(&v) == initial_size\0"
-	.align 8
-.LC49:
-	.ascii "vector_set_at(&v, 10, &data4) == NULL\0"
-	.text
-	.globl	test_vector_set_at
-	.def	test_vector_set_at;	.scl	2;	.type	32;	.endef
-	.seh_proc	test_vector_set_at
-test_vector_set_at:
-	pushq	%rbp
-	.seh_pushreg	%rbp
-	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$96, %rsp
-	.seh_stackalloc	96
-	.seh_endprologue
-	leaq	.LC46(%rip), %rax
-	movq	%rax, %rcx
-	call	printf
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_init
-	movl	$1, -52(%rbp)
-	movl	$2, -56(%rbp)
-	movl	$3, -60(%rbp)
-	movl	$999, -64(%rbp)
+	movl	$176, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC11(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L55:
 	leaq	-52(%rbp), %rdx
 	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	cmpl	$2, %eax
+	je	.L56
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
 	movq	%rax, %rcx
+	movl	$178, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC12(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L56:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	cmpq	$3, %rax
+	je	.L57
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$179, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC13(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L57:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_pop
+	movq	%rax, %rdx
+	leaq	-52(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L58
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$181, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC14(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L58:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	cmpq	$2, %rax
+	je	.L59
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$182, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC11(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L59:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_pop
+	movq	%rax, %rdx
+	leaq	-56(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L60
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$184, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC15(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L60:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	cmpq	$1, %rax
+	je	.L61
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$185, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC9(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L61:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_pop
+	movq	%rax, %rdx
+	leaq	-60(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L62
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$187, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC16(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L62:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	testq	%rax, %rax
+	je	.L63
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$188, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC17(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L63:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_pop
+	testq	%rax, %rax
+	je	.L64
+	leaq	__PRETTY_FUNCTION__.7(%rip), %rax
+	movq	%rax, %rcx
+	movl	$190, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC18(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L64:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L65
+	call	__stack_chk_fail@PLT
+.L65:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE20:
+	.size	test_vector_push_pop, .-test_vector_push_pop
+	.section	.rodata
+.LC19:
+	.string	"Testing vector_get_at... "
+	.align 8
+.LC20:
+	.string	"vector_get_at(&v, 0) == &data1"
+	.align 8
+.LC21:
+	.string	"*(int *) vector_get_at(&v, 0) == 10"
+	.align 8
+.LC22:
+	.string	"vector_get_at(&v, 1) == &data2"
+	.align 8
+.LC23:
+	.string	"*(int *) vector_get_at(&v, 1) == 20"
+	.align 8
+.LC24:
+	.string	"vector_get_at(&v, 2) == &data3"
+	.align 8
+.LC25:
+	.string	"*(int *) vector_get_at(&v, 2) == 30"
+.LC26:
+	.string	"vector_get_at(&v, 3) == NULL"
+	.align 8
+.LC27:
+	.string	"vector_get_at(&v, 100) == NULL"
+	.text
+	.globl	test_vector_get_at
+	.type	test_vector_get_at, @function
+test_vector_get_at:
+.LFB21:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC19(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$10, -60(%rbp)
+	movl	$20, -56(%rbp)
+	movl	$30, -52(%rbp)
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
 	call	vector_push
 	leaq	-56(%rbp), %rdx
 	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-52(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-48(%rbp), %rax
+	movl	$0, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movq	%rax, %rdx
+	leaq	-60(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L67
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
 	movq	%rax, %rcx
+	movl	$208, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC20(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L67:
+	leaq	-48(%rbp), %rax
+	movl	$0, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movl	(%rax), %eax
+	cmpl	$10, %eax
+	je	.L68
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$209, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC21(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L68:
+	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movq	%rax, %rdx
+	leaq	-56(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L69
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$211, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC22(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L69:
+	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movl	(%rax), %eax
+	cmpl	$20, %eax
+	je	.L70
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$212, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC23(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L70:
+	leaq	-48(%rbp), %rax
+	movl	$2, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movq	%rax, %rdx
+	leaq	-52(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L71
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$214, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC24(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L71:
+	leaq	-48(%rbp), %rax
+	movl	$2, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movl	(%rax), %eax
+	cmpl	$30, %eax
+	je	.L72
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$215, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC25(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L72:
+	leaq	-48(%rbp), %rax
+	movl	$3, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	testq	%rax, %rax
+	je	.L73
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$217, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC26(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L73:
+	leaq	-48(%rbp), %rax
+	movl	$100, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	testq	%rax, %rax
+	je	.L74
+	leaq	__PRETTY_FUNCTION__.6(%rip), %rax
+	movq	%rax, %rcx
+	movl	$218, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC27(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L74:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L75
+	call	__stack_chk_fail@PLT
+.L75:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE21:
+	.size	test_vector_get_at, .-test_vector_get_at
+	.section	.rodata
+.LC28:
+	.string	"Testing vector_delete_at... "
+.LC29:
+	.string	"v.free_slot == 1"
+.LC30:
+	.string	"vector_get_at(&v, 1) == NULL"
+.LC31:
+	.string	"vector_push(&v, &data4) == 1"
+	.align 8
+.LC32:
+	.string	"vector_get_at(&v, 1) == &data4"
+	.align 8
+.LC33:
+	.string	"*(int *) vector_get_at(&v, 1) == 400"
+	.text
+	.globl	test_vector_delete_at
+	.type	test_vector_delete_at, @function
+test_vector_delete_at:
+.LFB22:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC28(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$100, -64(%rbp)
+	movl	$200, -60(%rbp)
+	movl	$300, -56(%rbp)
+	movl	$400, -52(%rbp)
+	leaq	-64(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
 	call	vector_push
 	leaq	-60(%rbp), %rdx
 	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-56(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
 	call	vector_push
 	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_delete_at
+	movq	-24(%rbp), %rax
+	cmpq	$1, %rax
+	je	.L77
+	leaq	__PRETTY_FUNCTION__.5(%rip), %rax
 	movq	%rax, %rcx
-	call	vector_used
-	movq	%rax, -8(%rbp)
-	leaq	-64(%rbp), %rdx
+	movl	$237, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC29(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L77:
 	leaq	-48(%rbp), %rax
-	movq	%rdx, %r8
-	movl	$1, %edx
-	movq	%rax, %rcx
-	call	vector_set_at
-	leaq	-64(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L99
-	leaq	.LC47(%rip), %r9
-	leaq	__func__.0(%rip), %r8
-	movl	$349, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L99:
-	leaq	-48(%rbp), %rax
-	movq	%rax, %rcx
-	call	vector_used
-	cmpq	%rax, -8(%rbp)
-	je	.L100
-	leaq	.LC48(%rip), %r9
-	leaq	__func__.0(%rip), %r8
-	movl	$350, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L100:
-	leaq	-48(%rbp), %rax
-	movl	$1, %edx
-	movq	%rax, %rcx
+	movl	$1, %esi
+	movq	%rax, %rdi
 	call	vector_get_at
-	leaq	-64(%rbp), %rdx
-	cmpq	%rdx, %rax
-	je	.L101
-	leaq	.LC32(%rip), %r9
-	leaq	__func__.0(%rip), %r8
-	movl	$351, %edx
-	leaq	.LC2(%rip), %rax
-	movq	%rax, %rcx
-	call	__assert_func
-.L101:
-	leaq	-64(%rbp), %rdx
-	leaq	-48(%rbp), %rax
-	movq	%rdx, %r8
-	movl	$10, %edx
-	movq	%rax, %rcx
-	call	vector_set_at
 	testq	%rax, %rax
-	je	.L102
-	leaq	.LC49(%rip), %r9
-	leaq	__func__.0(%rip), %r8
-	movl	$353, %edx
-	leaq	.LC2(%rip), %rax
+	je	.L78
+	leaq	__PRETTY_FUNCTION__.5(%rip), %rax
 	movq	%rax, %rcx
-	call	__assert_func
-.L102:
+	movl	$238, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC30(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L78:
+	leaq	-52(%rbp), %rdx
 	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	cmpl	$1, %eax
+	je	.L79
+	leaq	__PRETTY_FUNCTION__.5(%rip), %rax
 	movq	%rax, %rcx
+	movl	$241, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC31(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L79:
+	movq	-24(%rbp), %rax
+	testq	%rax, %rax
+	je	.L80
+	leaq	__PRETTY_FUNCTION__.5(%rip), %rax
+	movq	%rax, %rcx
+	movl	$242, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC5(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L80:
+	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movq	%rax, %rdx
+	leaq	-52(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L81
+	leaq	__PRETTY_FUNCTION__.5(%rip), %rax
+	movq	%rax, %rcx
+	movl	$243, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC32(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L81:
+	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movl	(%rax), %eax
+	cmpl	$400, %eax
+	je	.L82
+	leaq	__PRETTY_FUNCTION__.5(%rip), %rax
+	movq	%rax, %rcx
+	movl	$244, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC33(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L82:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
 	call	vector_free
 	leaq	.LC6(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
+	movq	%rax, %rdi
+	call	puts@PLT
 	nop
-	addq	$96, %rsp
-	popq	%rbp
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L83
+	call	__stack_chk_fail@PLT
+.L83:
+	leave
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
-	.def	__main;	.scl	2;	.type	32;	.endef
-	.section .rdata,"dr"
+	.cfi_endproc
+.LFE22:
+	.size	test_vector_delete_at, .-test_vector_delete_at
+	.section	.rodata
+.LC34:
+	.string	"Testing vector_for_each... "
+.LC35:
+	.string	"counter == 3"
+	.text
+	.globl	test_vector_for_each
+	.type	test_vector_for_each, @function
+test_vector_for_each:
+.LFB23:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC34(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$1, -64(%rbp)
+	movl	$2, -60(%rbp)
+	movl	$3, -56(%rbp)
+	leaq	-64(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-56(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	movl	$0, -52(%rbp)
+	leaq	-52(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	leaq	test_for_each_callback(%rip), %rcx
+	movq	%rcx, %rsi
+	movq	%rax, %rdi
+	call	vector_for_each
+	movl	-52(%rbp), %eax
+	cmpl	$3, %eax
+	je	.L85
+	leaq	__PRETTY_FUNCTION__.4(%rip), %rax
+	movq	%rax, %rcx
+	movl	$264, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC35(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L85:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L86
+	call	__stack_chk_fail@PLT
+.L86:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE23:
+	.size	test_vector_for_each, .-test_vector_for_each
+	.section	.rodata
+.LC36:
+	.string	"Testing vector_delete_all... "
+	.text
+	.globl	test_vector_delete_all
+	.type	test_vector_delete_all, @function
+test_vector_delete_all:
+.LFB24:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC36(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$10, -60(%rbp)
+	movl	$20, -56(%rbp)
+	movl	$30, -52(%rbp)
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-56(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-52(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	cmpq	$3, %rax
+	je	.L88
+	leaq	__PRETTY_FUNCTION__.3(%rip), %rax
+	movq	%rax, %rcx
+	movl	$282, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC13(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L88:
+	leaq	-48(%rbp), %rax
+	leaq	test_delete_callback(%rip), %rdx
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_delete_all
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	testq	%rax, %rax
+	je	.L89
+	leaq	__PRETTY_FUNCTION__.3(%rip), %rax
+	movq	%rax, %rcx
+	movl	$285, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC17(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L89:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_pop
+	testq	%rax, %rax
+	je	.L90
+	leaq	__PRETTY_FUNCTION__.3(%rip), %rax
+	movq	%rax, %rcx
+	movl	$286, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC18(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L90:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L91
+	call	__stack_chk_fail@PLT
+.L91:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE24:
+	.size	test_vector_delete_all, .-test_vector_delete_all
+	.section	.rodata
+	.align 8
+.LC37:
+	.string	"Testing vector automatic resize... "
+.LC38:
+	.string	"vector_used(&v) == 100"
+.LC39:
+	.string	"v.size >= 100"
+	.align 8
+.LC40:
+	.string	"(intptr_t) vector_get_at(&v, i) == i"
+	.text
+	.globl	test_vector_resize
+	.type	test_vector_resize, @function
+test_vector_resize:
+.LFB25:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC37(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$0, -56(%rbp)
+	jmp	.L93
+.L94:
+	movl	-56(%rbp), %eax
+	cltq
+	movq	%rax, %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	addl	$1, -56(%rbp)
+.L93:
+	cmpl	$99, -56(%rbp)
+	jle	.L94
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	cmpq	$100, %rax
+	je	.L95
+	leaq	__PRETTY_FUNCTION__.2(%rip), %rax
+	movq	%rax, %rcx
+	movl	$302, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC38(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L95:
+	movq	-40(%rbp), %rax
+	cmpq	$99, %rax
+	ja	.L96
+	leaq	__PRETTY_FUNCTION__.2(%rip), %rax
+	movq	%rax, %rcx
+	movl	$303, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC39(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L96:
+	movl	$0, -52(%rbp)
+	jmp	.L97
+.L99:
+	movl	-52(%rbp), %eax
+	movslq	%eax, %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movq	%rax, %rdx
+	movl	-52(%rbp), %eax
+	cltq
+	cmpq	%rax, %rdx
+	je	.L98
+	leaq	__PRETTY_FUNCTION__.2(%rip), %rax
+	movq	%rax, %rcx
+	movl	$307, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC40(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L98:
+	addl	$1, -52(%rbp)
+.L97:
+	cmpl	$99, -52(%rbp)
+	jle	.L99
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L100
+	call	__stack_chk_fail@PLT
+.L100:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE25:
+	.size	test_vector_resize, .-test_vector_resize
+	.section	.rodata
+.LC41:
+	.string	"Testing vector_get_end... "
+.LC42:
+	.string	"vector_get_end(&v) == NULL"
+.LC43:
+	.string	"vector_get_end(&v) == &data1"
+.LC44:
+	.string	"vector_get_end(&v) == &data2"
+.LC45:
+	.string	"vector_get_end(&v) == &data3"
+	.text
+	.globl	test_vector_get_end
+	.type	test_vector_get_end, @function
+test_vector_get_end:
+.LFB26:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$64, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC41(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$111, -60(%rbp)
+	movl	$222, -56(%rbp)
+	movl	$333, -52(%rbp)
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_get_end
+	testq	%rax, %rax
+	je	.L102
+	leaq	__PRETTY_FUNCTION__.1(%rip), %rax
+	movq	%rax, %rcx
+	movl	$321, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC42(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L102:
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_get_end
+	movq	%rax, %rdx
+	leaq	-60(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L103
+	leaq	__PRETTY_FUNCTION__.1(%rip), %rax
+	movq	%rax, %rcx
+	movl	$324, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC43(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L103:
+	leaq	-56(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_get_end
+	movq	%rax, %rdx
+	leaq	-56(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L104
+	leaq	__PRETTY_FUNCTION__.1(%rip), %rax
+	movq	%rax, %rcx
+	movl	$327, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC44(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L104:
+	leaq	-52(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_get_end
+	movq	%rax, %rdx
+	leaq	-52(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L105
+	leaq	__PRETTY_FUNCTION__.1(%rip), %rax
+	movq	%rax, %rcx
+	movl	$330, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC45(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L105:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L106
+	call	__stack_chk_fail@PLT
+.L106:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE26:
+	.size	test_vector_get_end, .-test_vector_get_end
+	.section	.rodata
+.LC46:
+	.string	"Testing vector_set_at... "
+	.align 8
+.LC47:
+	.string	"vector_set_at(&v, 1, &data4) == &data4"
+	.align 8
+.LC48:
+	.string	"vector_used(&v) == initial_size"
+	.align 8
+.LC49:
+	.string	"vector_set_at(&v, 10, &data4) == NULL"
+	.text
+	.globl	test_vector_set_at
+	.type	test_vector_set_at, @function
+test_vector_set_at:
+.LFB27:
+	.cfi_startproc
+	endbr64
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$80, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	leaq	.LC46(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_init
+	movl	$1, -72(%rbp)
+	movl	$2, -68(%rbp)
+	movl	$3, -64(%rbp)
+	movl	$999, -60(%rbp)
+	leaq	-72(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-68(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-64(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
+	call	vector_push
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	movq	%rax, -56(%rbp)
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_set_at
+	movq	%rax, %rdx
+	leaq	-60(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L108
+	leaq	__PRETTY_FUNCTION__.0(%rip), %rax
+	movq	%rax, %rcx
+	movl	$349, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC47(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L108:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_used
+	cmpq	%rax, -56(%rbp)
+	je	.L109
+	leaq	__PRETTY_FUNCTION__.0(%rip), %rax
+	movq	%rax, %rcx
+	movl	$350, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC48(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L109:
+	leaq	-48(%rbp), %rax
+	movl	$1, %esi
+	movq	%rax, %rdi
+	call	vector_get_at
+	movq	%rax, %rdx
+	leaq	-60(%rbp), %rax
+	cmpq	%rax, %rdx
+	je	.L110
+	leaq	__PRETTY_FUNCTION__.0(%rip), %rax
+	movq	%rax, %rcx
+	movl	$351, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC32(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L110:
+	leaq	-60(%rbp), %rdx
+	leaq	-48(%rbp), %rax
+	movl	$10, %esi
+	movq	%rax, %rdi
+	call	vector_set_at
+	testq	%rax, %rax
+	je	.L111
+	leaq	__PRETTY_FUNCTION__.0(%rip), %rax
+	movq	%rax, %rcx
+	movl	$353, %edx
+	leaq	.LC1(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC49(%rip), %rax
+	movq	%rax, %rdi
+	call	__assert_fail@PLT
+.L111:
+	leaq	-48(%rbp), %rax
+	movq	%rax, %rdi
+	call	vector_free
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rdi
+	call	puts@PLT
+	nop
+	movq	-8(%rbp), %rax
+	subq	%fs:40, %rax
+	je	.L112
+	call	__stack_chk_fail@PLT
+.L112:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE27:
+	.size	test_vector_set_at, .-test_vector_set_at
+	.section	.rodata
 .LC50:
-	.ascii "=== Running Vector Tests ===\0"
+	.string	"=== Running Vector Tests ==="
 .LC51:
-	.ascii "\12=== All Tests Passed ===\0"
+	.string	"\n=== All Tests Passed ==="
 	.text
 	.globl	main
-	.def	main;	.scl	2;	.type	32;	.endef
-	.seh_proc	main
+	.type	main, @function
 main:
+.LFB28:
+	.cfi_startproc
+	endbr64
 	pushq	%rbp
-	.seh_pushreg	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$32, %rsp
-	.seh_stackalloc	32
-	.seh_endprologue
-	call	__main
+	.cfi_def_cfa_register 6
 	leaq	.LC50(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
+	movq	%rax, %rdi
+	call	puts@PLT
+	movl	$0, %eax
 	call	test_vector_init
+	movl	$0, %eax
 	call	test_vector_push_pop
+	movl	$0, %eax
 	call	test_vector_get_at
+	movl	$0, %eax
 	call	test_vector_delete_at
+	movl	$0, %eax
 	call	test_vector_for_each
+	movl	$0, %eax
 	call	test_vector_delete_all
+	movl	$0, %eax
 	call	test_vector_resize
+	movl	$0, %eax
 	call	test_vector_get_end
+	movl	$0, %eax
 	call	test_vector_set_at
 	leaq	.LC51(%rip), %rax
-	movq	%rax, %rcx
-	call	puts
+	movq	%rax, %rdi
+	call	puts@PLT
 	movl	$0, %eax
-	addq	$32, %rsp
 	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
-	.seh_endproc
-	.section .rdata,"dr"
+	.cfi_endproc
+.LFE28:
+	.size	main, .-main
+	.section	.rodata
 	.align 16
-__func__.8:
-	.ascii "test_vector_init\0"
+	.type	__PRETTY_FUNCTION__.8, @object
+	.size	__PRETTY_FUNCTION__.8, 17
+__PRETTY_FUNCTION__.8:
+	.string	"test_vector_init"
 	.align 16
-__func__.7:
-	.ascii "test_vector_push_pop\0"
+	.type	__PRETTY_FUNCTION__.7, @object
+	.size	__PRETTY_FUNCTION__.7, 21
+__PRETTY_FUNCTION__.7:
+	.string	"test_vector_push_pop"
 	.align 16
-__func__.6:
-	.ascii "test_vector_get_at\0"
+	.type	__PRETTY_FUNCTION__.6, @object
+	.size	__PRETTY_FUNCTION__.6, 19
+__PRETTY_FUNCTION__.6:
+	.string	"test_vector_get_at"
 	.align 16
-__func__.5:
-	.ascii "test_vector_delete_at\0"
+	.type	__PRETTY_FUNCTION__.5, @object
+	.size	__PRETTY_FUNCTION__.5, 22
+__PRETTY_FUNCTION__.5:
+	.string	"test_vector_delete_at"
 	.align 16
-__func__.4:
-	.ascii "test_vector_for_each\0"
+	.type	__PRETTY_FUNCTION__.4, @object
+	.size	__PRETTY_FUNCTION__.4, 21
+__PRETTY_FUNCTION__.4:
+	.string	"test_vector_for_each"
 	.align 16
-__func__.3:
-	.ascii "test_vector_delete_all\0"
+	.type	__PRETTY_FUNCTION__.3, @object
+	.size	__PRETTY_FUNCTION__.3, 23
+__PRETTY_FUNCTION__.3:
+	.string	"test_vector_delete_all"
 	.align 16
-__func__.2:
-	.ascii "test_vector_resize\0"
+	.type	__PRETTY_FUNCTION__.2, @object
+	.size	__PRETTY_FUNCTION__.2, 19
+__PRETTY_FUNCTION__.2:
+	.string	"test_vector_resize"
 	.align 16
-__func__.1:
-	.ascii "test_vector_get_end\0"
+	.type	__PRETTY_FUNCTION__.1, @object
+	.size	__PRETTY_FUNCTION__.1, 20
+__PRETTY_FUNCTION__.1:
+	.string	"test_vector_get_end"
 	.align 16
-__func__.0:
-	.ascii "test_vector_set_at\0"
-	.ident	"GCC: (GNU) 11.4.0"
-	.def	calloc;	.scl	2;	.type	32;	.endef
-	.def	realloc;	.scl	2;	.type	32;	.endef
-	.def	memset;	.scl	2;	.type	32;	.endef
-	.def	free;	.scl	2;	.type	32;	.endef
-	.def	printf;	.scl	2;	.type	32;	.endef
-	.def	__assert_func;	.scl	2;	.type	32;	.endef
-	.def	puts;	.scl	2;	.type	32;	.endef
+	.type	__PRETTY_FUNCTION__.0, @object
+	.size	__PRETTY_FUNCTION__.0, 19
+__PRETTY_FUNCTION__.0:
+	.string	"test_vector_set_at"
+	.ident	"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"
+	.section	.note.GNU-stack,"",@progbits
+	.section	.note.gnu.property,"a"
+	.align 8
+	.long	1f - 0f
+	.long	4f - 1f
+	.long	5
+0:
+	.string	"GNU"
+1:
+	.align 8
+	.long	0xc0000002
+	.long	3f - 2f
+2:
+	.long	0x3
+3:
+	.align 8
+4:
