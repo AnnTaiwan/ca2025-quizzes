@@ -97,7 +97,7 @@ CLZ:
     srli t1, a0, 16
     addi t0, t0, 16
     add t1, t1, x0    # t1 = a0 >> 16
-    slli t1, t1, 0      不做分支
+    slli t1, t1, 0   
     or a0, a0, x0  
 
     # Step 2: top 8 bits
