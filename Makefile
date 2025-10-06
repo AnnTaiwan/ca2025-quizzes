@@ -15,4 +15,4 @@ assembly_rv64:
 	riscv64-linux-gnu-gcc -S -march=rv64gc -mabi=lp64 q1-uf8.c -o q1-uf8_rv64.s
 	riscv64-linux-gnu-gcc -S -march=rv64gc -mabi=lp64 q1-bfloat16.c -o q1-bfloat16_rv64.s
 clean:
-	rm -f q1-vector q1-uf8 q1-bfloat16 *.s
+	rm -f q1-vector q1-uf8 q1-bfloat16
