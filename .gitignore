@@ -1,2 +1,7 @@
 *.exe
 q1-uf8_rv32_mine.s
+q1-bfloat_rv32_mine.s
+q1-vector
+q1-uf8
+q1-bfloat16
+junk
