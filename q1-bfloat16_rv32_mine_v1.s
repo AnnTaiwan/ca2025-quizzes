@@ -109,6 +109,36 @@ msg_mul_div_done:  .asciz "  Arithmetic (mul & div): PASS\n"
 msg_mul_err_too_large: .asciz "Multiplication failed"
 msg_div_err_too_large: .asciz "Division failed"
 
+# --- Test cases for test_comparisons ---
+D2_comparisons:
+# --- Test case 1: simple equality and inequality ---
+    .word 0x3F800000   # a = 1.0
+    .word 0x40000000   # b = 2.0
+    .word 0x3F800000   # c = 1.0
+
+# --- Test case 2: NaN comparisons ---
+    .word 0x7FC00000   # nan_val1
+    .word 0x7FC00000   # nan_val2
+    .word 0x3F800000   # a = 1.0 (for NaN comparison)
+
+len_D2_comparisons:
+    .word 6    # number of words (3 test cases, 3 words each)
+
+# --- Messages ---
+msg_comparisons_start:      .asciz "Testing comparison operations...\n"
+msg_comparisons_done:       .asciz "  Comparisons: PASS\n"
+msg_eq_fail:                .asciz "Equality test failed"
+msg_neq_fail:               .asciz "Inequality test failed"
+msg_lt_fail:                .asciz "Less than test failed"
+msg_notlt_fail:             .asciz "Not less than test failed"
+msg_enotlt_fail:             .asciz "Equal not less than test failed"
+msg_gt_fail:                .asciz "Greater than test failed"
+msg_notgt_fail:             .asciz "Not greater than test failed"
+msg_nan_eq_fail:            .asciz "NaN equality test failed"
+msg_nan_lt_fail:            .asciz "NaN less than test failed"
+msg_nan_gt_fail:            .asciz "NaN greater than test failed"
+
+
 .align 2
 .text
 .globl main
@@ -120,6 +150,9 @@ main:
     jal ra, test_basic_conversions
     or s0, s0, a0
     jal ra, test_arithmetic
+    or s0, s0, a0
+
+    jal ra, test_comparisons
     or s0, s0, a0
 
     beqz s0, print_pass
@@ -443,8 +476,138 @@ end_test_md:
     lw ra, 0(sp)
     addi sp, sp, 40
     jr ra
-################################################
 
+# Function: test_comparisons
+# Purpose : Test bf16's eq, lt, and gt
+# Arguments:
+#   None
+# Returns:
+#   a0 - 0 if all tests pass, 1 if any fail
+test_comparisons:
+    addi sp, sp, -20
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+    sw s3, 16(sp)
+
+    la s0, D2_comparisons # base address of test array
+    lw s1, 0(s0) # a
+    mv a0, s1
+    jal ra, f32_to_bf16
+    mv s1, a0
+    lw s2, 4(s0) # b
+    mv a0, s2
+    jal ra, f32_to_bf16
+    mv s2, a0
+    lw s3, 8(s0) # c
+    mv a0, s3
+    jal ra, f32_to_bf16
+    mv s3, a0
+    # Print message: start of conversion test
+    la a0, msg_comparisons_start 
+    li a7, 4
+    ecall
+
+    mv a0, s1
+    mv a1, s3
+    jal ra, bf16_eq
+    beqz a0, print_msg_eq_fail
+    mv a0, s1
+    mv a1, s2
+    jal ra, bf16_eq
+    bnez a0, print_msg_neq_fail
+    mv a0, s1
+    mv a1, s2
+    jal ra, bf16_lt
+    beqz a0, print_msg_lt_fail
+    mv a0, s2
+    mv a1, s1
+    jal ra, bf16_lt
+    bnez a0, print_msg_notlt_fail
+    mv a0, s1
+    mv a1, s3
+    jal ra, bf16_lt
+    bnez a0, print_msg_enotlt_fail
+
+    mv a0, s2
+    mv a1, s1
+    jal ra, bf16_gt
+    beqz a0, print_msg_gt_fail
+    mv a0, s1
+    mv a1, s2
+    jal ra, bf16_gt
+    bnez a0, print_msg_notgt_fail
+    # Load NAN
+    lw s2, 12(s0) # NAN_1
+    mv a0, s2
+    jal ra, f32_to_bf16
+    mv s2, a0
+    mv s3, s2 # NAN_2
+
+    mv a0, s2
+    mv a1, s3
+    jal ra, bf16_eq
+    bnez a0, print_msg_nan_eq_fail
+    mv a0, s2
+    mv a1, s1
+    jal ra, bf16_lt
+    bnez a0, print_msg_nan_lt_fail
+    mv a0, s2
+    mv a1, s1
+    jal ra, bf16_gt
+    bnez a0, print_msg_nan_gt_fail
+
+    # success
+    la a0, msg_comparisons_done
+    li a7, 4
+    ecall
+    li a0, 0 # return 0
+    j end_test_comparisons
+print_msg_eq_fail:
+    la a0, msg_eq_fail 
+    j print_err_msg_cp
+print_msg_neq_fail:
+    la a0, msg_neq_fail 
+    j print_err_msg_cp
+print_msg_lt_fail:
+    la a0, msg_lt_fail 
+    j print_err_msg_cp
+print_msg_notlt_fail:
+    la a0, msg_notlt_fail 
+    j print_err_msg_cp
+print_msg_enotlt_fail:
+    la a0, msg_enotlt_fail 
+    j print_err_msg_cp
+print_msg_gt_fail:
+    la a0, msg_gt_fail 
+    j print_err_msg_cp
+print_msg_notgt_fail:
+    la a0, msg_notgt_fail 
+    j print_err_msg_cp
+print_msg_nan_eq_fail:
+    la a0, msg_nan_eq_fail 
+    j print_err_msg_cp
+print_msg_nan_lt_fail:
+    la a0, msg_nan_lt_fail 
+    j print_err_msg_cp
+print_msg_nan_gt_fail:
+    la a0, msg_nan_gt_fail 
+    j print_err_msg_cp
+print_err_msg_cp:
+    li a7, 4
+    ecall
+    li a0, 1 # return 1
+    j end_test_comparisons
+end_test_comparisons:
+    lw s3, 16(sp)
+    lw s2, 12(sp)
+    lw s1, 8(sp)
+    lw s0, 4(sp)
+    lw ra, 0(sp)
+    addi sp, sp, 20
+    jr ra
+################################################
 ################################################
 # Function: bf16_isnan
 # Purpose : Determine if the input BF16 value is NaN.
@@ -1053,3 +1216,145 @@ div_end:
     andi t3, t3, 0x7F
     or a0, a0, t3
     jr ra
+
+# =====================================================
+# Function: bf16_eq
+# Purpose : Check if two bf16 numbers are equal
+# Arguments:
+#   a0 - bf16 a
+#   a1 - bf16 b
+# Returns:
+#   a0 - 1 if equal, 0 if not
+# =====================================================
+bf16_eq:
+    addi sp, sp, -12
+    sw   ra, 0(sp)
+    sw   a0, 4(sp)
+    sw   a1, 8(sp)
+
+    # Check if a is NaN
+    jal  ra, bf16_isnan
+    bnez a0, bf16_eq_false
+    lw   a0, 8(sp)  # reload b
+    jal  ra, bf16_isnan
+    bnez a0, bf16_eq_false
+
+    # Check if both are zero
+    lw   a0, 4(sp)
+    jal  ra, bf16_iszero
+    beqz a0, bf16_eq_check_bits
+    lw   a0, 8(sp)
+    jal  ra, bf16_iszero
+    beqz a0, bf16_eq_check_bits
+    li   a0, 1
+    j    bf16_eq_end
+
+bf16_eq_check_bits:
+    lw   a0, 4(sp)
+    lw   t0, 8(sp)
+    beq  a0, t0, bf16_eq_true
+
+bf16_eq_false:
+    li   a0, 0
+    j    bf16_eq_end
+
+bf16_eq_true:
+    li   a0, 1
+
+bf16_eq_end:
+    lw   ra, 0(sp)
+    addi sp, sp, 12
+    jr   ra
+
+
+# =====================================================
+# Function: bf16_lt
+# Purpose : Check if a < b (bf16)
+# Arguments:
+#   a0 - bf16 a
+#   a1 - bf16 b
+# Returns:
+#   a0 - 1 if a < b, 0 otherwise
+# =====================================================
+bf16_lt:
+    addi sp, sp, -12
+    sw   ra, 0(sp)
+    sw   a0, 4(sp)
+    sw   a1, 8(sp)
+
+    # NaN check
+    jal  ra, bf16_isnan
+    bnez a0, bf16_lt_false
+    lw   a0, 8(sp)
+    jal  ra, bf16_isnan
+    bnez a0, bf16_lt_false
+
+    # both zero check
+    lw   a0, 4(sp)
+    jal  ra, bf16_iszero
+    beqz a0, bf16_lt_check_signs
+    lw   a0, 8(sp)
+    jal  ra, bf16_iszero
+    beqz a0, bf16_lt_check_signs
+    li   a0, 0
+    j    bf16_lt_end
+
+bf16_lt_check_signs:
+    lw   a0, 4(sp)
+    srli t0, a0, 15
+    andi t0, t0, 1  # sign_a
+    lw   a1, 8(sp)
+    srli t1, a1, 15
+    andi t1, t1, 1  # sign_b
+
+    bne  t0, t1, bf16_lt_diff_signs
+    # same sign
+    beqz t0, bf16_lt_pos_compare  # positive
+    blt  a1, a0, bf16_lt_true     # negative
+    j    bf16_lt_false
+
+bf16_lt_diff_signs:
+    beqz t0, bf16_lt_false
+    li   a0, 1
+    j    bf16_lt_end
+
+bf16_lt_pos_compare:
+    blt  a0, a1, bf16_lt_true
+    j    bf16_lt_false
+
+bf16_lt_true:
+    li   a0, 1
+    j    bf16_lt_end
+
+bf16_lt_false:
+    li   a0, 0
+
+bf16_lt_end:
+    lw   ra, 0(sp)
+    addi sp, sp, 12
+    jr   ra
+
+
+# =====================================================
+# Function: bf16_gt
+# Purpose : Check if a > b (bf16)
+# Arguments:
+#   a0 - bf16 a
+#   a1 - bf16 b
+# Returns:
+#   a0 - 1 if a > b, 0 otherwise
+# =====================================================
+bf16_gt:
+    addi sp, sp, -8
+    sw   ra, 0(sp)
+    sw   a0, 4(sp)
+
+    # swap a0, a1 and call bf16_lt
+    mv   t0, a0
+    mv   a0, a1
+    mv   a1, t0
+    jal  ra, bf16_lt
+
+    lw   ra, 0(sp)
+    addi sp, sp, 8
+    jr   ra
