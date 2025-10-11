@@ -72,32 +72,38 @@ msg_sub_err_too_large: .asciz "Subtraction failed"
 # --- Test case for test_arithmetic_mul_div ---
 D2_mul_div:
 # --- Test case 1 ---
-    .word 0x3F800000   # a = 1.0
+    .word 0x41200000   # a = 10.0
     .word 0x40000000   # b = 2.0
-    .word 0x40000000   # ans_mul = 2.0 (1.0 * 2.0)
+    .word 0x41a00000   # ans_mul = 20.0 (10.0 * 2.0)
+    .word 0x40a00000   # ans_div = 5.0  (10.0 / 2.0)
 
 # --- Test case 2 ---
     .word 0x40400000   # a = 3.0
     .word 0x3FC00000   # b = 1.5
     .word 0x40900000   # ans_mul = 4.5 (3.0 * 1.5)
+    .word 0x40000000   # ans_div = 2.0  (3.0 / 1.5)
 
 # --- Test case 3 ---
     .word 0x40400000   # a = 3.0
     .word 0x40800000   # b = 4.0
     .word 0x41400000   # ans_mul = 12.0 (3.0 * 4.0)
+    .word 0x3f400000   # ans_div = 0.75  (3.0 / 4.0)
 
 # --- Test case 4 ---
     .word 0x3F000000   # a = 0.5
     .word 0xBF000000   # b = -0.5
     .word 0xBE800000   # ans_mul = -0.25 (0.5 * -0.5)
+    .word 0xBF800000   # ans_div = -1.0  (0.5 / -0.5)
 
 # --- Test case 5 ---
     .word 0x40490FD0   # a = 3.14159
     .word 0x3FC90FD0   # b = 1.570795
-    .word 0x409de9e2   # ans_mul ≈ 4.9348 (≈ π * π/2)
+    .word 0x409de9e2   # ans_mul ≈ 4.9348 (3.14159 * 1.570795)
+    .word 0x40000000   # ans_div ≈ 2.0 (3.14159 / 1.570795)
 
 len_D2_mul_div:
-    .word 15     # number of words (5 cases × 3 words each)
+    .word 20     # number of words (5 cases × 4 words each)
+
 msg_mul_div_start: .asciz "Testing arithmetic operations (mul & div)...\n"
 msg_mul_div_done:  .asciz "  Arithmetic (mul & div): PASS\n"
 msg_mul_err_too_large: .asciz "Multiplication failed"
@@ -388,25 +394,22 @@ loop_test_md:
     blt t0, t1, do_div
     j print_rel_err_too_large_mul
 do_div:
-    ##
-    j rel_err_ok_md
-    ##
-    # # sub
-    # lw s7, 12(s0) # sub answer (uint32_t)
-    # mv a0, s3
-    # mv a1, s4
-    # jal ra, bf16_sub
-    # jal ra, bf16_to_f32
+    # div
+    lw s7, 12(s0) # div answer (uint32_t)
+    mv a0, s3
+    mv a1, s4
+    jal ra, bf16_div
+    jal ra, bf16_to_f32
    
-    # mv s8, a0 # sub result (uint32_t)
+    mv s8, a0 # div result (uint32_t)
 
-    # # compare s7 s8
-    # xor t0, s7, s8
-    # li t1, 0x10001
-    # blt t0, t1, rel_err_ok_as
-    # j print_rel_err_too_large_sub
+    # compare s7 s8
+    xor t0, s7, s8
+    li t1, 0xC0001
+    blt t0, t1, rel_err_ok_md
+    j print_rel_err_too_large_div
 rel_err_ok_md:
-    addi s0, s0, 12
+    addi s0, s0, 16
     j loop_test_md    
 done_test_md:
     # Print message: mul_div test done
@@ -876,4 +879,177 @@ mul_end:
     or a0, a0, t3
     andi t4, t4, 0x7F
     or a0, a0, t4
+    jr ra
+
+# Function: bf16_div
+# Purpose : Perform a/b
+# Arguments:
+#   a0 - input value (bf16_t a)
+#   a1 - input value (bf16_t b)
+# Returns:
+#   a0 - multiplication result (bf16_t)
+bf16_div:
+    srli a2, a0, 15
+    andi a2, a2, 1 # sign_a
+    srli a3, a1, 15
+    andi a3, a3, 1 # sign_b
+
+    srli a4, a0, 7
+    andi a4, a4, 0xFF # exp_a
+    srli a5, a1, 7
+    andi a5, a5, 0xFF # exp_b
+
+    andi a6, a0, 0x7F # mant_a
+    andi a7, a1, 0x7F # mant_b
+
+    xor t6, a2, a3 # result_sign
+# if (exp_b == 0xFF) {
+div_check_b:
+    li t0, 0xFF
+    beq a5, t0, div_b_inf_nan
+    bnez a5, div_check_a
+    bnez a7, div_check_a
+    bnez a4, div_ret_inf
+    bnez a6, div_ret_inf
+    la a0, BF16_NAN
+    lw a0, 0(a0) # return nan
+    jr ra
+div_b_inf_nan:
+    bnez a7, div_ret_b
+    bne a4, t0, div_ret_0
+    bnez a6, div_ret_0
+    la a0, BF16_NAN
+    lw a0, 0(a0) # return nan
+    jr ra
+
+div_ret_b:
+    mv a0, a1 # return b
+    jr ra
+div_ret_0:
+    slli a0, t6, 15
+    jr ra
+div_ret_inf:
+    slli t0, t6, 15
+    la a0, BF16_INF
+    lw a0, 0(a0) # return +/- inf
+    or a0, a0, t0
+    jr ra
+# if (exp_a == 0xFF) {
+div_check_a:
+    li t0, 0xFF
+    beq a4, t0, div_a_inf_nan
+    bnez a4, div_mant_a_get_implicit_one
+    bnez a6, div_mant_a_get_implicit_one
+    j div_ret_0
+div_a_inf_nan:
+    bnez a6, div_ret_a
+    j div_ret_inf
+div_ret_a:
+    jr ra
+div_mant_a_get_implicit_one:
+    beqz a4, div_mant_b_get_implicit_one
+    ori a6, a6, 0x80
+div_mant_b_get_implicit_one:
+    beqz a5, div_start
+    ori a7, a7, 0x80
+div_start:
+    slli t5, a6, 15 # dividend
+    mv t4, a7 # divisor
+    li t3, 0 # quotient
+# =====================================================
+# Function: bitwise_divide
+# Purpose : Compute quotient of two 16-bit integers
+# Input   : t5 = dividend (numerator)
+#           t4 = divisor  (denominator)
+# Output  : t3 = quotient
+#           t5 = remainder (optional)
+# Clobbers: t0, t1, t2
+#
+# Description:
+#   This function performs bitwise division using a restoring
+#   division method. It iteratively shifts the divisor and 
+#   compares it with the dividend:
+#     quotient <<= 1
+#     if dividend >= (divisor << shift):
+#         dividend -= (divisor << shift)
+#         quotient |= 1
+#   The loop runs 16 times to produce a 16-bit quotient.
+# =====================================================
+bitwise_divide:
+    li      t3, 0            # quotient = 0
+    li      t1, 0            # loop counter i = 0
+
+div_loop:
+    slli    t3, t3, 1        # quotient <<= 1
+
+    li      t2, 15
+    sub     t2, t2, t1       # shift = 15 - i
+    sll     t0, t4, t2       # t0 = divisor << shift
+
+    # if dividend >= shifted divisor
+    bltu    t5, t0, div_skip_sub
+    sub     t5, t5, t0       # dividend -= shifted divisor
+    ori     t3, t3, 1        # quotient |= 1
+div_skip_sub:
+    addi    t1, t1, 1        # i++
+    li      t2, 16
+    blt     t1, t2, div_loop
+
+    # Result: t3 = quotient, t5 = remainder
+# =====================================================
+    sub t2, a4, a5 # result_exp
+    la t0, BF16_EXP_BIAS
+    lw t0, 0(t0)
+    add t2, t2, t0
+
+    beqz a4, div_exp_minus1
+    beqz a5, div_exp_plus1
+    j div_start2
+div_exp_minus1:
+    addi t2, t2, -1
+div_exp_plus1:
+    addi t2, t2, 1
+
+div_start2:
+    li t0, 0x8000
+    and t1, t3, t0
+    beqz t1, div_normalize_loop
+    srli t3, t3, 8
+    j div_skip_normalize_loop
+# =====================================================
+# Normalize quotient to have MSB = 1
+# while (!(quotient & 0x8000) && result_exp > 1)
+#     quotient <<= 1
+#     result_exp--
+# Input/Output:
+#   t3 = quotient
+#   t2 = result_exp
+# Clobbers: t0
+# =====================================================
+div_normalize_loop:
+    li   t0, 0x8000        # mask for MSB of 16-bit
+div_normalize_check:
+    and  t1, t3, t0        # t1 = quotient & 0x8000
+    bnez t1, div_normalize_done   # if MSB = 1, exit
+    li   t1, 1
+    ble  t2, t1, div_normalize_done  # if result_exp <= 1, exit
+    slli t3, t3, 1         # quotient <<= 1
+    addi t2, t2, -1        # result_exp--
+    j    div_normalize_check
+div_normalize_done:
+    srli t3, t3, 8
+# =====================================================
+div_skip_normalize_loop:
+    andi t3, t3, 0x7F
+
+    li t0, 0xFF
+    bge t2, t0, div_ret_inf
+    blez t2, div_ret_0
+div_end:
+    slli a0, t6, 15
+    andi t2, t2, 0xFF
+    slli t2, t2, 7
+    or a0, a0, t2
+    andi t3, t3, 0x7F
+    or a0, a0, t3
     jr ra
