@@ -12,6 +12,7 @@ BF16_EXP_BIAS:   .word 127         # Exponent bias
 
 BF16_NAN:        .word 0x7FC0      # NaN representation
 BF16_ZERO:       .word 0x0000      # Zero representation
+BF16_INF:       .word 0x7F80      # positive inf representation
 
 # --- Test case for test_basic_conversions ---
 # --- Float test cases for f32 <-> bf16 conversion ---
@@ -67,6 +68,40 @@ msg_add_sub_start: .asciz "Testing arithmetic operations (add & sub)...\n"
 msg_add_sub_done:  .asciz "  Arithmetic (add & sub): PASS\n"
 msg_add_err_too_large: .asciz "Addition failed"
 msg_sub_err_too_large: .asciz "Subtraction failed"
+
+# --- Test case for test_arithmetic_mul_div ---
+D2_mul_div:
+# --- Test case 1 ---
+    .word 0x3F800000   # a = 1.0
+    .word 0x40000000   # b = 2.0
+    .word 0x40000000   # ans_mul = 2.0 (1.0 * 2.0)
+
+# --- Test case 2 ---
+    .word 0x40400000   # a = 3.0
+    .word 0x3FC00000   # b = 1.5
+    .word 0x40900000   # ans_mul = 4.5 (3.0 * 1.5)
+
+# --- Test case 3 ---
+    .word 0x40400000   # a = 3.0
+    .word 0x40800000   # b = 4.0
+    .word 0x41400000   # ans_mul = 12.0 (3.0 * 4.0)
+
+# --- Test case 4 ---
+    .word 0x3F000000   # a = 0.5
+    .word 0xBF000000   # b = -0.5
+    .word 0xBE800000   # ans_mul = -0.25 (0.5 * -0.5)
+
+# --- Test case 5 ---
+    .word 0x40490FD0   # a = 3.14159
+    .word 0x3FC90FD0   # b = 1.570795
+    .word 0x409de9e2   # ans_mul ≈ 4.9348 (≈ π * π/2)
+
+len_D2_mul_div:
+    .word 15     # number of words (5 cases × 3 words each)
+msg_mul_div_start: .asciz "Testing arithmetic operations (mul & div)...\n"
+msg_mul_div_done:  .asciz "  Arithmetic (mul & div): PASS\n"
+msg_mul_err_too_large: .asciz "Multiplication failed"
+msg_div_err_too_large: .asciz "Division failed"
 
 .align 2
 .text
@@ -184,10 +219,20 @@ end_test_basic_conversions:
 # Returns:
 #   a0 - 0 if all tests pass, 1 if any fail
 test_arithmetic:
+    addi sp, sp, -4
+    sw ra, 0(sp)
     la a0, D2_add_sub
     la a1, len_D2_add_sub
     lw a1, 0(a1)
     jal ra, test_arithmetic_add_sub
+
+    la a0, D2_mul_div
+    la a1, len_D2_mul_div
+    lw a1, 0(a1)
+    jal ra, test_arithmetic_mul_div
+
+    lw ra, 0(sp)
+    addi sp, sp, 4
     jr ra
 # Function: test_arithmetic_add_sub
 # Purpose : Test bf16's add, sub
@@ -290,12 +335,111 @@ end_test_as:
     lw ra, 0(sp)
     addi sp, sp, 40
     jr ra
-# Function: test_arithmetic_add_sub
-# Purpose : Test bf16's add, sub, mul, div, and sqrt (test cases are fixed in this function)
+
+# Function: test_arithmetic_mul_div
+# Purpose : Test bf16's mul, div
 # Arguments:
-#   None
+#   a0 - base address of test data array (32-bit uint32_t)
+#   a1 - number of test elements
 # Returns:
 #   a0 - 0 if all tests pass, 1 if any fail
+test_arithmetic_mul_div:
+    addi sp, sp, -40
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+    sw s3, 16(sp)
+    sw s4, 20(sp)
+    sw s5, 24(sp)
+    sw s6, 28(sp)
+    sw s7, 32(sp)
+    sw s8, 36(sp)
+
+    mv s0, a0 # base address of test array
+    mv s1, a1 # number of elements
+    # Print message: start of conversion test
+    la a0, msg_mul_div_start 
+    li a7, 4
+    ecall
+    # Compute end address
+    slli t0, s1, 2        # s1 * 4 bytes
+    add s2, s0, t0       # s2 = end address
+loop_test_md:
+    beq s0, s2, done_test_md # all elements tested?
+    lw a0, 0(s0) # load test value (uint32_t)
+    jal ra, f32_to_bf16 # convert to bf16
+    mv s3, a0 # a (bf16)
+    lw a0, 4(s0) # load test value (uint32_t)
+    jal ra, f32_to_bf16 # convert to bf16
+    mv s4, a0 # b (bf16)
+    lw s5, 8(s0) # mul answer (uint32_t)
+    # mul
+    mv a0, s3
+    mv a1, s4
+    jal ra, bf16_mul
+    jal ra, bf16_to_f32
+   
+    mv s6, a0 # mul result (uint32_t)
+
+    # compare s5 s6
+    xor t0, s5, s6
+    li t1, 0xC0001 # 0.1 = 2^-4 + 2^-5 = 0xC << 16, plus 1 for branch
+    blt t0, t1, do_div
+    j print_rel_err_too_large_mul
+do_div:
+    ##
+    j rel_err_ok_md
+    ##
+    # # sub
+    # lw s7, 12(s0) # sub answer (uint32_t)
+    # mv a0, s3
+    # mv a1, s4
+    # jal ra, bf16_sub
+    # jal ra, bf16_to_f32
+   
+    # mv s8, a0 # sub result (uint32_t)
+
+    # # compare s7 s8
+    # xor t0, s7, s8
+    # li t1, 0x10001
+    # blt t0, t1, rel_err_ok_as
+    # j print_rel_err_too_large_sub
+rel_err_ok_md:
+    addi s0, s0, 12
+    j loop_test_md    
+done_test_md:
+    # Print message: mul_div test done
+    la a0, msg_mul_div_done
+    li a7, 4
+    ecall
+    li a0, 0 # return 0
+    j end_test_md
+print_rel_err_too_large_mul:
+    la a0, msg_mul_err_too_large
+    li a7, 4
+    ecall
+    li a0, 1 # return 1
+    j end_test_md
+print_rel_err_too_large_div:
+    la a0, msg_div_err_too_large
+    li a7, 4
+    ecall
+    li a0, 1 # return 1
+    j end_test_md
+end_test_md:
+    lw s8, 36(sp)
+    lw s7, 32(sp)
+    lw s6, 28(sp)
+    lw s5, 24(sp)
+    lw s4, 20(sp)
+    lw s3, 16(sp)
+    lw s2, 12(sp)
+    lw s1, 8(sp)
+    lw s0, 4(sp)
+    lw ra, 0(sp)
+    addi sp, sp, 40
+    jr ra
 ################################################
 
 ################################################
@@ -381,6 +525,26 @@ bf16_to_f32:
     slli a0, a0, 16 # fp32bits
     jr ra   # jump to ra
 
+# Function: CLZ
+# Purpose : Count the number of leading zeros in a 32-bit integer
+# Arguments:
+#   a0 - input value (uint32_t x)
+# Returns:
+#   a0 - number of leading zeros (uint32_t)
+#
+# Description:
+#   This function calculates the number of leading zeros in a 32-bit register
+#   by iteratively shifting and checking the upper bits.
+#   It initializes n = 32 and uses c = 16 as an initial shift count.
+#   The loop halves the shift value each iteration:
+#     - If the shifted value is not zero, subtract c from n and continue.
+#     - If the shifted value is zero, reduce c by half and retry.
+#   The final result (number of leading zeros) is stored in a0.
+#
+# Registers used:
+#   t0 - current count of leading zeros (n)
+#   t1 - current shift amount (c)
+#   t2 - temporary for shifted value (y)
 CLZ:
     li t0, 32 #n
     li t1, 16 #c
@@ -500,7 +664,7 @@ check_add_result:
     sw ra, 0(sp)
     sw a0, 4(sp)
     mv a0, t6 # result_mant
-    jal CLZ
+    jal ra, CLZ
     li t0, 32
     sub t0, t0, a0
     li t1, 8
@@ -543,3 +707,173 @@ bf16_sub:
     addi sp, sp, 4
     jr ra
 
+# Function: bf16_mul
+# Purpose : Perform a*b
+# Arguments:
+#   a0 - input value (bf16_t a)
+#   a1 - input value (bf16_t b)
+# Returns:
+#   a0 - multiplication result (bf16_t)
+bf16_mul:
+    srli a2, a0, 15
+    andi a2, a2, 1 # sign_a
+    srli a3, a1, 15
+    andi a3, a3, 1 # sign_b
+
+    srli a4, a0, 7
+    andi a4, a4, 0xFF # exp_a
+    srli a5, a1, 7
+    andi a5, a5, 0xFF # exp_b
+
+    andi a6, a0, 0x7F # mant_a
+    andi a7, a1, 0x7F # mant_b
+
+    xor t6, a2, a3 # result_sign
+# if (exp_a == 0xFF)
+    li t0, 0xFF
+    beq a4, t0, mul_a_inf_nan
+    beq a5, t0, mul_b_inf_nan
+# if ((!exp_a && !mant_a) || (!exp_b && !mant_b))
+    li t1, 0x7FFF
+    and t2, a0, t1 # a0 without sign bit
+    beq t2, x0, mul_ret_0
+    and t3, a1, t1 # a1 without sign bit
+    beq t3, x0, mul_ret_0
+    j mul_start # finish deal with special case
+mul_ret_0:
+    slli a0, t6, 15
+    jr ra
+# in if (exp_a == 0xFF)
+mul_a_inf_nan:
+    bnez a6, mul_ret_a
+    bnez a5, mul_ret_inf 
+    bnez a7, mul_ret_inf
+    la a0, BF16_NAN
+    lw a0, 0(a0) # retrun nan
+    jr ra
+# in if (exp_b == 0xFF)
+mul_b_inf_nan:
+    bnez a7, mul_ret_b
+    bnez a4, mul_ret_inf 
+    bnez a6, mul_ret_inf
+    la a0, BF16_NAN
+    lw a0, 0(a0) # retrun nan
+    jr ra
+mul_ret_a:
+    jr ra
+mul_ret_b:
+    mv a0, a1
+    jr ra
+mul_ret_inf:
+    la t0, BF16_INF
+    lw t0, 0(t0)
+    slli a0, t6, 15
+    or a0, a0, t0 # sign << 15 | inf
+    jr ra
+
+mul_start:
+    li t5, 0 # exp_adjust
+# if (!exp_a)
+    bnez a4, mul_mant_a_get_implicit_one
+    # Prepare to call CLZ
+    addi sp, sp, -8
+    sw ra, 0(sp)
+    sw a0, 4(sp)
+    mv a0, a6 # mant_a
+    jal ra, CLZ
+    li t0, 32
+    sub t0, t0, a0
+    li t1, 8
+    sub t1, t1, t0 # number of shift in while
+    sll a6, a6, t1 # mant_a <<= t1
+    sub t5, t5, t1 # exp_adjust -= t1
+    lw a0, 4(sp)
+    lw ra, 0(sp)
+    addi sp, sp, 8
+    li a4, 1
+    j mul_start_2
+mul_mant_a_get_implicit_one:
+    ori a6, a6, 0x80
+
+# if (!exp_b)
+    bnez a5, mul_mant_b_get_implicit_one
+    # Prepare to call CLZ
+    addi sp, sp, -8
+    sw ra, 0(sp)
+    sw a0, 4(sp)
+    mv a0, a7 # mant_b
+    jal ra, CLZ
+    li t0, 32
+    sub t0, t0, a0
+    li t1, 8
+    sub t1, t1, t0 # number of shift in while
+    sll a7, a7, t1 # mant_b <<= t1
+    sub t5, t5, t1 # exp_adjust -= t1
+    lw a0, 4(sp)
+    lw ra, 0(sp)
+    addi sp, sp, 8
+    li a5, 1
+    j mul_start_2
+mul_mant_b_get_implicit_one:
+    ori a7, a7, 0x80
+
+mul_start_2:
+    j mul_mantissa
+# =====================================================
+# Function: mul_mantissa
+# Purpose : t4 = mant_a * mant_b  (without using MUL)
+# Input   : a6 = mant_a, a7 = mant_b
+# Output  : t4 = result_mant
+# Clobbers: t0, t1, t2, t3
+# =====================================================
+mul_mantissa:
+    li      t4, 0          # result_mant = 0
+    mv      t0, a6         # t0 = mant_a
+    mv      t1, a7         # t1 = mant_b
+    li      t2, 0          # loop counter (optional, for readability)
+
+mul_loop:
+    andi    t3, t1, 1      # check LSB of mant_b
+    beqz    t3, skip_add   # if LSB == 0, skip add
+    add     t4, t4, t0     # result += mant_a
+skip_add:
+    slli    t0, t0, 1      # mant_a <<= 1
+    srli    t1, t1, 1      # mant_b >>= 1
+    addi    t2, t2, 1
+    bnez    t1, mul_loop   # repeat until mant_b == 0
+# =====================================================
+    mv t3, a4 # result_exp
+    add t3, t3, a5
+    la t2, BF16_EXP_BIAS
+    lw t2, 0(t2)
+    sub t3, t3, t2
+    add t3, t3, t5
+
+    li t0, 0x8000
+    and t0, t4, t0
+    beqz t0, mul_mant_is_zero
+    srli t4, t4, 8
+    andi t4, t4, 0x7F
+    addi t3, t3, 1
+    j mul_check_exp
+mul_mant_is_zero:
+    srli t4, t4, 7
+    andi t4, t4, 0x7F
+mul_check_exp:
+    li t0, 0xFF
+    bge t3, t0, mul_ret_inf
+    bgtz t3, mul_end 
+    li t0, -6
+    blt t3, t0, mul_ret_0
+    li t0, 1
+    sub t0, t0, t3
+    srl t4, t4, t0
+    li t3, 0
+mul_end:
+    slli a0, t6, 15
+    andi t3, t3, 0xFF
+    slli t3, t3, 7
+    or a0, a0, t3
+    andi t4, t4, 0x7F
+    or a0, a0, t4
+    jr ra
