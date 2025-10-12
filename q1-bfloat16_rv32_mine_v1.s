@@ -1,6 +1,6 @@
 .data
-msg1:   .asciz "Testing basic conversions...\n"
 newline:   .asciz "\n"
+msg_init: .asciz "\n=== bfloat16 Test Suite ===\n\n"
 msg_fail: .asciz "\n=== TESTS FAILED ===\n"
 msg_pass: .asciz "\n=== ALL TESTS PASSED ===\n"
 
@@ -34,7 +34,7 @@ len_D1:
     .word 11     # number of words
 
 
-msg_conv_start: .asciz "Testing basic conversions...\n"
+msg_conv_start: .asciz "\nTesting basic conversions...\n"
 msg_conv_done:  .asciz "  Basic conversions: PASS\n"
 msg_conv_err_sign: .asciz "Sign mismatch"
 msg_conv_err_too_large: .asciz "Relative error too large"
@@ -64,7 +64,7 @@ len_D2_add_sub:
     .word 12     # number of words
 
 
-msg_add_sub_start: .asciz "Testing arithmetic operations (add & sub)...\n"
+msg_add_sub_start: .asciz "\nTesting arithmetic operations (add & sub)...\n"
 msg_add_sub_done:  .asciz "  Arithmetic (add & sub): PASS\n"
 msg_add_err_too_large: .asciz "Addition failed"
 msg_sub_err_too_large: .asciz "Subtraction failed"
@@ -104,10 +104,30 @@ D2_mul_div:
 len_D2_mul_div:
     .word 20     # number of words (5 cases × 4 words each)
 
-msg_mul_div_start: .asciz "Testing arithmetic operations (mul & div)...\n"
+msg_mul_div_start: .asciz "\nTesting arithmetic operations (mul & div)...\n"
 msg_mul_div_done:  .asciz "  Arithmetic (mul & div): PASS\n"
 msg_mul_err_too_large: .asciz "Multiplication failed"
 msg_div_err_too_large: .asciz "Division failed"
+
+# --- Test case for test_arithmetic_sqrt ---
+D2_sqrt:
+# --- Test case 1 ---
+    .word 0x40800000   # a = 4.0
+    .word 0x40000000   # a = 2.0
+# --- Test case 2 ---
+    .word 0x41100000   # a = 9.0
+    .word 0x40400000   # a = 3.0
+# --- Test case 3 ---
+    .word 0x43800000   # a = 256.0
+    .word 0x41800000   # a = 16.0
+
+len_D2_sqrt:
+    .word 6     # number of words (5 cases × 4 words each)
+
+msg_sqrt_start: .asciz "\nTesting arithmetic operations (sqrt)...\n"
+msg_sqrt_done:  .asciz "  Arithmetic (sqrt): PASS\n"
+msg_sqrt_err_too_large_start: .asciz "sqrt("
+msg_sqrt_err_too_large_end: .asciz ") failed"
 
 # --- Test cases for test_comparisons ---
 D2_comparisons:
@@ -125,7 +145,7 @@ len_D2_comparisons:
     .word 6    # number of words (3 test cases, 3 words each)
 
 # --- Messages ---
-msg_comparisons_start:      .asciz "Testing comparison operations...\n"
+msg_comparisons_start:      .asciz "\nTesting comparison operations...\n"
 msg_comparisons_done:       .asciz "  Comparisons: PASS\n"
 msg_eq_fail:                .asciz "Equality test failed"
 msg_neq_fail:               .asciz "Inequality test failed"
@@ -143,6 +163,9 @@ msg_nan_gt_fail:            .asciz "NaN greater than test failed"
 .text
 .globl main
 main:
+    la a0, msg_init
+    li a7, 4
+    ecall
     li s0, 0 # failed value
     la a0, D1 # base address of test array
     la t0, len_D1
@@ -160,14 +183,14 @@ print_fail:
     la a0, msg_fail
     li a7, 4
     ecall
-    li a7, 10         # ecall: exit
+    li a7, 93         # ecall: exit
     li a0, 1 # exit code is 1, not successful
     ecall
 print_pass:
     la a0, msg_pass
     li a7, 4
     ecall
-    li a7, 10         # ecall: exit
+    li a7, 93         # ecall: exit
     li a0, 0 # exit code is 0, successful
     ecall
 # Function: test_basic_conversions
@@ -269,6 +292,11 @@ test_arithmetic:
     la a1, len_D2_mul_div
     lw a1, 0(a1)
     jal ra, test_arithmetic_mul_div
+
+    la a0, D2_sqrt
+    la a1, len_D2_sqrt
+    lw a1, 0(a1)
+    jal ra, test_arithmetic_sqrt
 
     lw ra, 0(sp)
     addi sp, sp, 4
@@ -476,7 +504,83 @@ end_test_md:
     lw ra, 0(sp)
     addi sp, sp, 40
     jr ra
+# Function: test_arithmetic_sqrt
+# Purpose : Test bf16's sqrt
+# Arguments:
+#   a0 - base address of test data array (32-bit uint32_t)
+#   a1 - number of test elements
+# Returns:
+#   a0 - 0 if all tests pass, 1 if any fail
+test_arithmetic_sqrt:
+    addi sp, sp, -28
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+    sw s3, 16(sp)
+    sw s4, 20(sp)
+    sw s5, 24(sp)
 
+    mv s0, a0 # base address of test array
+    mv s1, a1 # number of elements
+    # Print message: start of conversion test
+    la a0, msg_sqrt_start 
+    li a7, 4
+    ecall
+    # Compute end address
+    slli t0, s1, 2        # s1 * 4 bytes
+    add s2, s0, t0       # s2 = end address
+loop_test_sqrt:
+    beq s0, s2, done_test_sqrt # all elements tested?
+    lw a0, 0(s0) # load test value (uint32_t)
+    jal ra, f32_to_bf16 # convert to bf16
+    mv s3, a0 # a (bf16)
+    lw s4, 4(s0) # sqrt answer (uint32_t)
+    # sqrt
+    mv a0, s3
+    jal ra, bf16_sqrt
+    jal ra, bf16_to_f32
+   
+    mv s5, a0 # sqrt result (uint32_t)
+
+    # compare s4 s5
+    xor t0, s4, s5
+    li t1, 0x10001
+    blt t0, t1, rel_err_ok_sqrt
+    j print_rel_err_too_large_sqrt
+
+rel_err_ok_sqrt:
+    addi s0, s0, 8
+    j loop_test_sqrt    
+done_test_sqrt:
+    # Print message: add_sub test done
+    la a0, msg_sqrt_done
+    li a7, 4
+    ecall
+    li a0, 0 # return 0
+    j end_test_sqrt
+print_rel_err_too_large_sqrt:
+    la a0, msg_sqrt_err_too_large_start
+    li a7, 4
+    ecall
+    lw a0, 0(s0) # a: test value
+    li a7, 34
+    ecall
+    la a0, msg_sqrt_err_too_large_end
+    li a7, 4
+    ecall
+    li a0, 1 # return 1
+    j end_test_sqrt
+end_test_sqrt:
+    lw s5, 24(sp)
+    lw s4, 20(sp)
+    lw s3, 16(sp)
+    lw s2, 12(sp)
+    lw s1, 8(sp)
+    lw s0, 4(sp)
+    lw ra, 0(sp)
+    addi sp, sp, 28
+    jr ra
 # Function: test_comparisons
 # Purpose : Test bf16's eq, lt, and gt
 # Arguments:
@@ -1217,6 +1321,146 @@ div_end:
     or a0, a0, t3
     jr ra
 
+
+# Function: bf16_sqrt
+# Purpose : Perform sqrt(a)
+# Arguments:
+#   a0 - input value (bf16_t a)
+# Returns:
+#   a0 - sqrt result (bf16_t)
+bf16_sqrt:
+    srli a1, a0, 15 # sign
+    andi a1, a1, 1
+    srli a2, a0, 7 # exp
+    andi a2, a2, 0xFF
+    andi a3, a0, 0x7F # mant
+    # Handle special case
+    li t0, 0xFF
+    beq a2, t0, sqrt_a_inf_nan
+    bnez a2, sqrt_check_sign
+    bnez a3, sqrt_check_sign
+    j sqrt_ret_0
+sqrt_a_inf_nan:
+    bnez a3, sqrt_ret_a
+    bnez a1, sqrt_ret_nan
+    j sqrt_ret_a
+sqrt_ret_a:
+    jr ra
+sqrt_ret_nan:
+    la t0, BF16_NAN
+    lw a0, 0(t0)
+    jr ra
+sqrt_ret_0:
+    la t0, BF16_ZERO
+    lw a0, 0(t0)
+    jr ra
+sqrt_check_sign:
+    bnez a1, sqrt_ret_nan
+    beqz a2, sqrt_ret_0
+
+    la t0, BF16_EXP_BIAS
+    lw t0, 0(t0)
+    sub a4, a2, t0 # e
+    li a5, 0 # new_exp
+    ori a6, a3, 0x80 # m
+    andi t0, a4, 1
+    bnez t0, sqrt_e_odd
+    srli t1, a4, 1
+    j sqrt_start
+sqrt_e_odd:
+    slli a6, a6, 1
+    addi t0, a4, -1
+    srli t1, t0, 1
+sqrt_start:
+    la t0, BF16_EXP_BIAS
+    lw t0, 0(t0)
+    add a5, t0, t1
+
+    li t6, 90 # low
+    li t5, 256 # high
+    li t4, 128 # result
+# --------------------------------------------------------
+# Function: binary_sqrt_loop
+# Purpose : Find approximate sqrt(m) using integer binary search
+# Registers:
+#   a6 - input mantissa (m)
+#   t6 - low bound (init = 90)
+#   t5 - high bound (init = 256)
+#   t4 - result (init = 128)
+# Clobbers: t0–t3, a7
+# --------------------------------------------------------
+
+binary_sqrt_loop:
+    ble t5, t6, sqrt_done          # if low > high → done
+
+sqrt_iter:
+    add t0, t6, t5                 # t0 = low + high
+    srai t0, t0, 1                 # mid = (low + high) >> 1
+
+    # --- sq = mid * mid (manual multiply) ---
+    mv t1, t0                      # temp_mid = mid
+    mv t2, t0                      # cnt = mid
+    li t3, 0                       # sq = 0
+
+sq_loop:
+    beqz t2, sq_done               # while (cnt != 0)
+    andi a7, t2, 1
+    beqz a7, sq_skip_add
+    add t3, t3, t1                 # sq += temp_mid
+sq_skip_add:
+    slli t1, t1, 1                 # temp_mid <<= 1
+    srli t2, t2, 1                 # cnt >>= 1
+    j sq_loop
+sq_done:
+    srli t3, t3, 7                 # sq >>= 7  (divide by 128)
+
+    # --- if (sq <= m) ---
+    ble t3, a6, sqrt_take_low
+    j sqrt_take_high
+
+sqrt_take_low:
+    mv t4, t0                      # result = mid
+    addi t6, t0, 1                 # low = mid + 1
+    j sqrt_continue
+
+sqrt_take_high:
+    addi t5, t0, -1                # high = mid - 1
+
+sqrt_continue:
+    ble t6, t5, sqrt_iter          # while (low <= high)
+    j sqrt_done
+
+sqrt_done:
+    # t4 = result (approx sqrt(m))
+    li t0, 256
+    bge t4, t0, sqrt_scale_down
+    li t0, 128
+    bge t4, t0, sqrt_scale_done
+    li t1, 1
+    ble a5, t1, sqrt_scale_done
+    # while (result < 128 && new_exp > 1)
+    li t1, 1
+sq_loop_2:
+    slli t4, t4, 1
+    addi a5, a5, -1
+    bge t4, t0, sqrt_scale_done
+    ble a5, t1, sqrt_scale_done
+    j sq_loop_2
+sqrt_scale_down:
+    srli t4, t4, 1
+    addi a5, a5, 1
+sqrt_scale_done:
+    andi t3, t4, 0x7F # new_mant
+    li t0, 0xFF
+    bge a5, t0, sqrt_ret_pos_inf
+    blez a5, sqrt_ret_0
+    andi a0, a5, 0xFF
+    slli a0, a0, 7
+    or a0, a0, t3
+    jr ra
+sqrt_ret_pos_inf:
+    li a0, 0x7F80 # return +Inf
+    jr ra
 # =====================================================
 # Function: bf16_eq
 # Purpose : Check if two bf16 numbers are equal
