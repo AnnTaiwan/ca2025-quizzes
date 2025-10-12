@@ -186,18 +186,6 @@ msg_tiny_value_fail:       .asciz "Tiny value handling"
 msg_overflow_fail:         .asciz "Overflow should produce infinity"
 msg_underflow_fail:        .asciz "Underflow should produce zero or denormal"
 
-
-# --- Test cases for test_rounding ---
-CONST_1_5:        .word 0x3FC00000     # 1.5f
-CONST_1_0001:     .word 0x3f800347     # 1.0001f
-CONST_0_001:      .word 0x3A83126F     # 0.001f
-
-# --- Messages ---
-msg_rounding_start:       .asciz "\nTesting rounding behavior...\n"
-msg_rounding_done:        .asciz "  Rounding: PASS\n"
-msg_rounding_exact_fail:  .asciz "Exact representation should be preserved"
-msg_rounding_small_fail:  .asciz "Rounding error should be small"
-
 .align 2
 .text
 .globl main
@@ -218,8 +206,6 @@ main:
     jal ra, test_comparisons
     or s0, s0, a0
     jal ra, test_edge_cases
-    or s0, s0, a0
-    jal ra, test_rounding
     or s0, s0, a0
     beqz s0, print_pass
 print_fail:
@@ -872,7 +858,10 @@ test_edge_cases:
     lw      a0, 0(a0)
     jal     ra, f32_to_bf16
     sw      a0, 4(sp)            # bf_tiny <- slot 4
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # bf16_iszero(bf_tiny)?
     lw      a0, 4(sp)
     jal     ra, bf16_iszero
@@ -882,7 +871,10 @@ test_edge_cases:
     lw      a0, 4(sp)
     jal     ra, bf16_to_f32
     sw      a0, 24(sp)           # tiny_val (float bits)
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # abs(tiny_val)  (use t0)
     lw      t0, 24(sp)
     bltz    t0, tiny_abs
@@ -909,19 +901,28 @@ test_tiny_pass:
     lw      a0, 0(a0)
     jal     ra, f32_to_bf16
     sw      a0, 8(sp)            # bf_huge
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # bf10 = f32_to_bf16(10.0f) -> slot 12(sp)
     la      a0, CONST_10_0
     lw      a0, 0(a0)
     jal     ra, f32_to_bf16
     sw      a0, 12(sp)           # bf10
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # bf_huge2 = bf16_mul(bf_huge, bf10) -> slot 16(sp)
     lw      a0, 8(sp)
     lw      a1, 12(sp)
     jal     ra, bf16_mul
     sw      a0, 16(sp)           # bf_huge2
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # check if inf: bf16_isinf(bf_huge2)
     lw      a0, 16(sp)
     jal     ra, bf16_isinf
@@ -940,19 +941,28 @@ test_overflow_pass:
     lw      a0, 0(a0)
     jal     ra, f32_to_bf16
     sw      a0, 8(sp)            # small
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # denom = f32_to_bf16(1e10f) -> reuse slot 12(sp)
     la      a0, CONST_1e10
     lw      a0, 0(a0)
     jal     ra, f32_to_bf16
     sw      a0, 12(sp)           # denom
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # smaller = bf16_div(small, denom) -> slot 20(sp)
     lw      a0, 8(sp)
     lw      a1, 12(sp)
     jal     ra, bf16_div
     sw      a0, 20(sp)           # smaller
-
+    ##
+    li a7, 34
+    ecall
+    ##
     # if bf16_iszero(smaller) -> pass
     lw      a0, 20(sp)
     jal     ra, bf16_iszero
@@ -1013,121 +1023,7 @@ end_test_ec:
     addi    sp, sp, 32
     jr      ra
 
-# Function: test_rounding
-# Purpose : Test bf16 rounding correctness (preserve exact values & small rounding error)
-# Arguments:
-#   None
-# Returns:
-#   a0 - 0 if all tests pass, 1 if any fail
-test_rounding:
-    addi sp, sp, -32          # reserve 32 bytes for locals + ra
-    sw ra, 28(sp)             # save return address
-
-    # Layout:
-    # sp+28 : ra
-    # sp+24 : bf_exact
-    # sp+20 : back_exact
-    # sp+16 : bf
-    # sp+12 : back
-    # sp+8  : diff2
-    # sp+4  : temp (unused/reserved)
-
-    # print start message
-    la a0, msg_rounding_start
-    li a7, 4
-    ecall
-
-# -------------------------------------------------------------
-# Test 1: Exact representation should be preserved
-# -------------------------------------------------------------
-    # bf_exact = f32_to_bf16(1.5f)
-    la a0, CONST_1_5
-    lw a0, 0(a0)
-    jal ra, f32_to_bf16
-    sw a0, 24(sp)             # store bf_exact
-
-    # back_exact = bf16_to_f32(bf_exact)
-    lw a0, 24(sp)
-    jal ra, bf16_to_f32
-    sw a0, 20(sp)             # store back_exact
-
-    # load original exact (1.5f)
-    la t0, CONST_1_5
-    lw t0, 0(t0)
-    lw t1, 20(sp)             # back_exact
-    bne t0, t1, rounding_exact_fail
-
-# passed
-rounding_exact_pass:
-
-# -------------------------------------------------------------
-# Test 2: Rounding error should be small (< 0.001f)
-# -------------------------------------------------------------
-    # bf = f32_to_bf16(1.0001f)
-    la a0, CONST_1_0001
-    lw a0, 0(a0)
-    jal ra, f32_to_bf16
-    sw a0, 16(sp)             # store bf
-
-    # back = bf16_to_f32(bf)
-    lw a0, 16(sp)
-    jal ra, bf16_to_f32
-    sw a0, 12(sp)             # store back
-
-    # diff2 = back - val
-    la t0, CONST_1_0001
-    lw t0, 0(t0)              # val
-    lw t1, 12(sp)             # back
-    sub t2, t1, t0            # diff2 = back - val
-    sw t2, 8(sp)
-
-    # if (diff2 < 0) diff2 = -diff2
-    bltz t2, round_diff_abs
-    j round_diff_chk
-round_diff_abs:
-    neg t2, t2
-round_diff_chk:
-    la t3, CONST_0_001
-    lw t3, 0(t3)
-    bltu t2, t3, rounding_small_pass
-
-    # fail
-    la a0, msg_rounding_small_fail
-    j print_err_msg_rnd
-
-rounding_small_pass:
-
-# -------------------------------------------------------------
-# Success path
-# -------------------------------------------------------------
-    la a0, msg_rounding_done
-    li a7, 4
-    ecall
-    li a0, 0
-    j end_test_rnd
-
-# -------------------------------------------------------------
-# Error handlers
-# -------------------------------------------------------------
-rounding_exact_fail:
-    la a0, msg_rounding_exact_fail
-    j print_err_msg_rnd
-
-print_err_msg_rnd:
-    li a7, 4
-    ecall
-    li a0, 1
-    j end_test_rnd
-
-# -------------------------------------------------------------
-# End & restore
-# -------------------------------------------------------------
-end_test_rnd:
-    lw ra, 28(sp)
-    addi sp, sp, 32
-    jr ra
 ################################################
-# bf16 functions start ...
 ################################################
 # Function: bf16_isnan
 # Purpose : Determine if the input BF16 value is NaN.

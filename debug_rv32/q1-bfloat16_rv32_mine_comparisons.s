@@ -1,6 +1,6 @@
-.data
+    .data
+msg1:   .asciz "Testing basic conversions...\n"
 newline:   .asciz "\n"
-msg_init: .asciz "\n=== bfloat16 Test Suite ===\n\n"
 msg_fail: .asciz "\n=== TESTS FAILED ===\n"
 msg_pass: .asciz "\n=== ALL TESTS PASSED ===\n"
 
@@ -34,7 +34,7 @@ len_D1:
     .word 11     # number of words
 
 
-msg_conv_start: .asciz "\nTesting basic conversions...\n"
+msg_conv_start: .asciz "Testing basic conversions...\n"
 msg_conv_done:  .asciz "  Basic conversions: PASS\n"
 msg_conv_err_sign: .asciz "Sign mismatch"
 msg_conv_err_too_large: .asciz "Relative error too large"
@@ -64,7 +64,7 @@ len_D2_add_sub:
     .word 12     # number of words
 
 
-msg_add_sub_start: .asciz "\nTesting arithmetic operations (add & sub)...\n"
+msg_add_sub_start: .asciz "Testing arithmetic operations (add & sub)...\n"
 msg_add_sub_done:  .asciz "  Arithmetic (add & sub): PASS\n"
 msg_add_err_too_large: .asciz "Addition failed"
 msg_sub_err_too_large: .asciz "Subtraction failed"
@@ -104,30 +104,10 @@ D2_mul_div:
 len_D2_mul_div:
     .word 20     # number of words (5 cases × 4 words each)
 
-msg_mul_div_start: .asciz "\nTesting arithmetic operations (mul & div)...\n"
+msg_mul_div_start: .asciz "Testing arithmetic operations (mul & div)...\n"
 msg_mul_div_done:  .asciz "  Arithmetic (mul & div): PASS\n"
 msg_mul_err_too_large: .asciz "Multiplication failed"
 msg_div_err_too_large: .asciz "Division failed"
-
-# --- Test case for test_arithmetic_sqrt ---
-D2_sqrt:
-# --- Test case 1 ---
-    .word 0x40800000   # a = 4.0
-    .word 0x40000000   # a = 2.0
-# --- Test case 2 ---
-    .word 0x41100000   # a = 9.0
-    .word 0x40400000   # a = 3.0
-# --- Test case 3 ---
-    .word 0x43800000   # a = 256.0
-    .word 0x41800000   # a = 16.0
-
-len_D2_sqrt:
-    .word 6     # number of words (5 cases × 4 words each)
-
-msg_sqrt_start: .asciz "\nTesting arithmetic operations (sqrt)...\n"
-msg_sqrt_done:  .asciz "  Arithmetic (sqrt): PASS\n"
-msg_sqrt_err_too_large_start: .asciz "sqrt("
-msg_sqrt_err_too_large_end: .asciz ") failed"
 
 # --- Test cases for test_comparisons ---
 D2_comparisons:
@@ -145,7 +125,7 @@ len_D2_comparisons:
     .word 6    # number of words (3 test cases, 3 words each)
 
 # --- Messages ---
-msg_comparisons_start:      .asciz "\nTesting comparison operations...\n"
+msg_comparisons_start:      .asciz "Testing comparison operations...\n"
 msg_comparisons_done:       .asciz "  Comparisons: PASS\n"
 msg_eq_fail:                .asciz "Equality test failed"
 msg_neq_fail:               .asciz "Inequality test failed"
@@ -158,82 +138,36 @@ msg_nan_eq_fail:            .asciz "NaN equality test failed"
 msg_nan_lt_fail:            .asciz "NaN less than test failed"
 msg_nan_gt_fail:            .asciz "NaN greater than test failed"
 
-# --- Test cases for test_special_values ---
-# --- Messages ---
-msg_special_values_start:      .asciz "\nTesting special values...\n"
-msg_special_values_done:       .asciz "  Special values: PASS\n"
-msg_posinf_fail:            .asciz "Positive infinity not detected"
-msg_neginf_fail:            .asciz "Negative infinity not detected"
-msg_nan_fail:               .asciz "NaN not detected"
-msg_nan_as_inf_fail:        .asciz "NaN detected as infinity"
-msg_inf_as_nan_fail:        .asciz "Infinity detected as NaN"
-msg_zero_fail:              .asciz "Zero not detected"
-msg_negzero_fail:           .asciz "Negative zero not detected"
-
-
-# --- Test cases for test_edge_cases ---
-CONST_1e_45:        .word 0x00000001     # 1e-45f
-CONST_1e_37_small:  .word 0x02081cea     # 1e-37f
-CONST_1e_38_small:  .word 0x006ce3ee     # 1e-38f
-CONST_1e38:         .word 0x7e967699     # 1e38f
-CONST_1e10:         .word 0x501502f9     # 1e10f
-CONST_10_0:         .word 0x41200000     # 10.0f
-CONST_1e_45_abs:    .word 0x00000001     # 1e-45f again (for abs check)
-# --- Messages ---
-msg_edge_cases_start:      .asciz "\nTesting edge cases...\n"
-msg_edge_cases_done:       .asciz "  Edge cases: PASS\n"
-msg_tiny_value_fail:       .asciz "Tiny value handling"
-msg_overflow_fail:         .asciz "Overflow should produce infinity"
-msg_underflow_fail:        .asciz "Underflow should produce zero or denormal"
-
-
-# --- Test cases for test_rounding ---
-CONST_1_5:        .word 0x3FC00000     # 1.5f
-CONST_1_0001:     .word 0x3f800347     # 1.0001f
-CONST_0_001:      .word 0x3A83126F     # 0.001f
-
-# --- Messages ---
-msg_rounding_start:       .asciz "\nTesting rounding behavior...\n"
-msg_rounding_done:        .asciz "  Rounding: PASS\n"
-msg_rounding_exact_fail:  .asciz "Exact representation should be preserved"
-msg_rounding_small_fail:  .asciz "Rounding error should be small"
 
 .align 2
 .text
 .globl main
 main:
-    la a0, msg_init
-    li a7, 4
-    ecall
     li s0, 0 # failed value
     la a0, D1 # base address of test array
     la t0, len_D1
     lw a1, 0(t0) # number of test elements
     jal ra, test_basic_conversions
     or s0, s0, a0
-    jal ra, test_special_values
-    or s0, s0, a0
     jal ra, test_arithmetic
     or s0, s0, a0
+
     jal ra, test_comparisons
     or s0, s0, a0
-    jal ra, test_edge_cases
-    or s0, s0, a0
-    jal ra, test_rounding
-    or s0, s0, a0
+
     beqz s0, print_pass
 print_fail:
     la a0, msg_fail
     li a7, 4
     ecall
-    li a7, 93         # ecall: exit
+    li a7, 10         # ecall: exit
     li a0, 1 # exit code is 1, not successful
     ecall
 print_pass:
     la a0, msg_pass
     li a7, 4
     ecall
-    li a7, 93         # ecall: exit
+    li a7, 10         # ecall: exit
     li a0, 0 # exit code is 0, successful
     ecall
 # Function: test_basic_conversions
@@ -335,11 +269,6 @@ test_arithmetic:
     la a1, len_D2_mul_div
     lw a1, 0(a1)
     jal ra, test_arithmetic_mul_div
-
-    la a0, D2_sqrt
-    la a1, len_D2_sqrt
-    lw a1, 0(a1)
-    jal ra, test_arithmetic_sqrt
 
     lw ra, 0(sp)
     addi sp, sp, 4
@@ -547,83 +476,7 @@ end_test_md:
     lw ra, 0(sp)
     addi sp, sp, 40
     jr ra
-# Function: test_arithmetic_sqrt
-# Purpose : Test bf16's sqrt
-# Arguments:
-#   a0 - base address of test data array (32-bit uint32_t)
-#   a1 - number of test elements
-# Returns:
-#   a0 - 0 if all tests pass, 1 if any fail
-test_arithmetic_sqrt:
-    addi sp, sp, -28
-    sw ra, 0(sp)
-    sw s0, 4(sp)
-    sw s1, 8(sp)
-    sw s2, 12(sp)
-    sw s3, 16(sp)
-    sw s4, 20(sp)
-    sw s5, 24(sp)
 
-    mv s0, a0 # base address of test array
-    mv s1, a1 # number of elements
-    # Print message: start of conversion test
-    la a0, msg_sqrt_start 
-    li a7, 4
-    ecall
-    # Compute end address
-    slli t0, s1, 2        # s1 * 4 bytes
-    add s2, s0, t0       # s2 = end address
-loop_test_sqrt:
-    beq s0, s2, done_test_sqrt # all elements tested?
-    lw a0, 0(s0) # load test value (uint32_t)
-    jal ra, f32_to_bf16 # convert to bf16
-    mv s3, a0 # a (bf16)
-    lw s4, 4(s0) # sqrt answer (uint32_t)
-    # sqrt
-    mv a0, s3
-    jal ra, bf16_sqrt
-    jal ra, bf16_to_f32
-   
-    mv s5, a0 # sqrt result (uint32_t)
-
-    # compare s4 s5
-    xor t0, s4, s5
-    li t1, 0x10001
-    blt t0, t1, rel_err_ok_sqrt
-    j print_rel_err_too_large_sqrt
-
-rel_err_ok_sqrt:
-    addi s0, s0, 8
-    j loop_test_sqrt    
-done_test_sqrt:
-    # Print message: add_sub test done
-    la a0, msg_sqrt_done
-    li a7, 4
-    ecall
-    li a0, 0 # return 0
-    j end_test_sqrt
-print_rel_err_too_large_sqrt:
-    la a0, msg_sqrt_err_too_large_start
-    li a7, 4
-    ecall
-    lw a0, 0(s0) # a: test value
-    li a7, 34
-    ecall
-    la a0, msg_sqrt_err_too_large_end
-    li a7, 4
-    ecall
-    li a0, 1 # return 1
-    j end_test_sqrt
-end_test_sqrt:
-    lw s5, 24(sp)
-    lw s4, 20(sp)
-    lw s3, 16(sp)
-    lw s2, 12(sp)
-    lw s1, 8(sp)
-    lw s0, 4(sp)
-    lw ra, 0(sp)
-    addi sp, sp, 28
-    jr ra
 # Function: test_comparisons
 # Purpose : Test bf16's eq, lt, and gt
 # Arguments:
@@ -754,380 +607,7 @@ end_test_comparisons:
     lw ra, 0(sp)
     addi sp, sp, 20
     jr ra
-
-# Function: test_special_values
-# Purpose : Test bf16's special values +/-Inf or +/-0
-# Arguments:
-#   None
-# Returns:
-#   a0 - 0 if all tests pass, 1 if any fail
-test_special_values:
-    addi sp, sp, -4
-    sw ra, 0(sp)
-    la a0, msg_special_values_start
-    li a7, 4
-    ecall
-
-    la a0, BF16_INF
-    lw a0, 0(a0)
-    jal ra, bf16_isinf
-    beqz a0, print_msg_posinf_fail
-    la a0, BF16_INF
-    lw a0, 0(a0)
-    jal ra, bf16_isnan
-    bnez a0, print_msg_inf_as_nan_fail
-
-    li t0, 1
-    slli t0, t0, 15
-    la a0, BF16_INF
-    lw a0, 0(a0)
-    or a0, a0, t0 # -Inf
-    jal ra, bf16_isinf
-    beqz a0, print_msg_neginf_fail
-
-    la a0, BF16_NAN
-    lw a0, 0(a0)
-    jal ra, bf16_isnan
-    beqz a0, print_msg_nan_fail
-    la a0, BF16_NAN
-    lw a0, 0(a0)
-    jal ra, bf16_isinf
-    bnez a0, print_msg_nan_as_inf_fail
-
-    li a0, 0
-    jal ra, f32_to_bf16
-    jal ra, bf16_iszero
-    beqz a0, print_msg_zero_fail
-    
-    li a0, 1
-    slli a0, a0, 15
-    jal ra, f32_to_bf16
-    jal ra, bf16_iszero
-    beqz a0, print_msg_negzero_fail
-
-    # success
-    la a0, msg_special_values_done
-    li a7, 4
-    ecall
-    li a0, 0 # return 0
-    j end_test_sv
-print_msg_posinf_fail:
-    la a0, msg_posinf_fail 
-    j print_err_msg_sv
-print_msg_neginf_fail:
-    la a0, msg_neginf_fail 
-    j print_err_msg_sv
-print_msg_nan_fail:
-    la a0, msg_nan_fail 
-    j print_err_msg_sv
-print_msg_nan_as_inf_fail:
-    la a0, msg_nan_as_inf_fail 
-    j print_err_msg_sv
-print_msg_inf_as_nan_fail:
-    la a0, msg_inf_as_nan_fail 
-    j print_err_msg_sv
-print_msg_zero_fail:
-    la a0, msg_zero_fail 
-    j print_err_msg_sv
-print_msg_negzero_fail:
-    la a0, msg_negzero_fail 
-    j print_err_msg_sv
-print_err_msg_sv:
-    li a7, 4
-    ecall
-    li a0, 1 # return 1
-    j end_test_sv
-end_test_sv:
-    lw ra, 0(sp)
-    addi sp, sp, 4
-    jr ra
-
-# Function: test_edge_cases
-# Purpose : Test bf16's handling of tiny, overflow, and underflow values
-# Arguments:
-#   None
-# Returns:
-#   a0 - 0 if all tests pass, 1 if any fail
-test_edge_cases:
-    # Reserve stack: ra + 5 slots for values (t0..t4) => 6 * 4 = 24 bytes
-    addi    sp, sp, -32
-    sw      ra, 0(sp)
-    sw      zero, 4(sp)    # reserved (slot 4)  - (use as bf_tiny)
-    sw      zero, 8(sp)    # reserved (slot 8)  - (use as bf_huge)
-    sw      zero, 12(sp)   # reserved (slot 12) - (use as bf10)
-    sw      zero, 16(sp)   # reserved (slot 16) - (use as bf_huge2)
-    sw      zero, 20(sp)   # reserved (slot 20) - (use as smaller)
-    # extra 24(sp) free if needed
-
-    # print start message
-    la      a0, msg_edge_cases_start
-    li      a7, 4
-    ecall
-
-# -------------------------------------------------------------
-# Test 1: Tiny value handling (1e-45f)
-# -------------------------------------------------------------
-    # a0 = f32_to_bf16(1e-45f)  -> save to slot 4(sp)
-    la      a0, CONST_1e_45
-    lw      a0, 0(a0)
-    jal     ra, f32_to_bf16
-    sw      a0, 4(sp)            # bf_tiny <- slot 4
-
-    # bf16_iszero(bf_tiny)?
-    lw      a0, 4(sp)
-    jal     ra, bf16_iszero
-    bnez    a0, test_tiny_pass   # if zero, ok
-
-    # else: tiny_val = bf16_to_f32(bf_tiny) -> store in slot 24(sp)
-    lw      a0, 4(sp)
-    jal     ra, bf16_to_f32
-    sw      a0, 24(sp)           # tiny_val (float bits)
-
-    # abs(tiny_val)  (use t0)
-    lw      t0, 24(sp)
-    bltz    t0, tiny_abs
-    j       tiny_check
-tiny_abs:
-    neg     t0, t0
-tiny_check:
-    # compare with 1e-37f (CONST_1e_37_small)
-    la      t1, CONST_1e_37_small
-    lw      t1, 0(t1)
-    bltu    t0, t1, test_tiny_pass
-
-    # failed tiny test
-    la      a0, msg_tiny_value_fail
-    j       print_err_msg_ec
-
-test_tiny_pass:
-
-# -------------------------------------------------------------
-# Test 2: Overflow should produce infinity
-# -------------------------------------------------------------
-    # bf_huge = f32_to_bf16(1e38f) -> slot 8(sp)
-    la      a0, CONST_1e38
-    lw      a0, 0(a0)
-    jal     ra, f32_to_bf16
-    sw      a0, 8(sp)            # bf_huge
-
-    # bf10 = f32_to_bf16(10.0f) -> slot 12(sp)
-    la      a0, CONST_10_0
-    lw      a0, 0(a0)
-    jal     ra, f32_to_bf16
-    sw      a0, 12(sp)           # bf10
-
-    # bf_huge2 = bf16_mul(bf_huge, bf10) -> slot 16(sp)
-    lw      a0, 8(sp)
-    lw      a1, 12(sp)
-    jal     ra, bf16_mul
-    sw      a0, 16(sp)           # bf_huge2
-
-    # check if inf: bf16_isinf(bf_huge2)
-    lw      a0, 16(sp)
-    jal     ra, bf16_isinf
-    bnez    a0, test_overflow_pass
-
-    la      a0, msg_overflow_fail
-    j       print_err_msg_ec
-
-test_overflow_pass:
-
-# -------------------------------------------------------------
-# Test 3: Underflow should produce zero or denormal
-# -------------------------------------------------------------
-    # small = f32_to_bf16(1e-38f) -> reuse slot 8(sp)
-    la      a0, CONST_1e_38_small
-    lw      a0, 0(a0)
-    jal     ra, f32_to_bf16
-    sw      a0, 8(sp)            # small
-
-    # denom = f32_to_bf16(1e10f) -> reuse slot 12(sp)
-    la      a0, CONST_1e10
-    lw      a0, 0(a0)
-    jal     ra, f32_to_bf16
-    sw      a0, 12(sp)           # denom
-
-    # smaller = bf16_div(small, denom) -> slot 20(sp)
-    lw      a0, 8(sp)
-    lw      a1, 12(sp)
-    jal     ra, bf16_div
-    sw      a0, 20(sp)           # smaller
-
-    # if bf16_iszero(smaller) -> pass
-    lw      a0, 20(sp)
-    jal     ra, bf16_iszero
-    bnez    a0, test_underflow_pass
-
-    # else: smaller_val = bf16_to_f32(smaller) -> slot 24(sp)
-    lw      a0, 20(sp)
-    jal     ra, bf16_to_f32
-    sw      a0, 24(sp)           # smaller_val (float bits)
-
-    # abs(smaller_val) into t0
-    lw      t0, 24(sp)
-    bltz    t0, under_abs
-    j       under_check
-under_abs:
-    neg     t0, t0
-under_check:
-    # compare to 1e-45f (CONST_1e_45)
-    la      t1, CONST_1e_45
-    lw      t1, 0(t1)
-    bltu    t0, t1, test_underflow_pass
-
-    la      a0, msg_underflow_fail
-    j       print_err_msg_ec
-
-test_underflow_pass:
-
-# -------------------------------------------------------------
-# Success path
-# -------------------------------------------------------------
-    la      a0, msg_edge_cases_done
-    li      a7, 4
-    ecall
-
-    li      a0, 0
-    j       end_test_ec
-
-# -------------------------------------------------------------
-# Error printing (shared)
-# -------------------------------------------------------------
-print_err_msg_ec:
-    li      a7, 4
-    ecall
-    li      a0, 1
-    j       end_test_ec
-
-# -------------------------------------------------------------
-# End & restore
-# -------------------------------------------------------------
-end_test_ec:
-    lw      a0, 24(sp)    # restore used temp (optional)
-    lw      a1, 20(sp)
-    lw      t4, 16(sp)
-    lw      t3, 12(sp)
-    lw      t2, 8(sp)
-    lw      t1, 4(sp)
-    lw      ra, 0(sp)
-    addi    sp, sp, 32
-    jr      ra
-
-# Function: test_rounding
-# Purpose : Test bf16 rounding correctness (preserve exact values & small rounding error)
-# Arguments:
-#   None
-# Returns:
-#   a0 - 0 if all tests pass, 1 if any fail
-test_rounding:
-    addi sp, sp, -32          # reserve 32 bytes for locals + ra
-    sw ra, 28(sp)             # save return address
-
-    # Layout:
-    # sp+28 : ra
-    # sp+24 : bf_exact
-    # sp+20 : back_exact
-    # sp+16 : bf
-    # sp+12 : back
-    # sp+8  : diff2
-    # sp+4  : temp (unused/reserved)
-
-    # print start message
-    la a0, msg_rounding_start
-    li a7, 4
-    ecall
-
-# -------------------------------------------------------------
-# Test 1: Exact representation should be preserved
-# -------------------------------------------------------------
-    # bf_exact = f32_to_bf16(1.5f)
-    la a0, CONST_1_5
-    lw a0, 0(a0)
-    jal ra, f32_to_bf16
-    sw a0, 24(sp)             # store bf_exact
-
-    # back_exact = bf16_to_f32(bf_exact)
-    lw a0, 24(sp)
-    jal ra, bf16_to_f32
-    sw a0, 20(sp)             # store back_exact
-
-    # load original exact (1.5f)
-    la t0, CONST_1_5
-    lw t0, 0(t0)
-    lw t1, 20(sp)             # back_exact
-    bne t0, t1, rounding_exact_fail
-
-# passed
-rounding_exact_pass:
-
-# -------------------------------------------------------------
-# Test 2: Rounding error should be small (< 0.001f)
-# -------------------------------------------------------------
-    # bf = f32_to_bf16(1.0001f)
-    la a0, CONST_1_0001
-    lw a0, 0(a0)
-    jal ra, f32_to_bf16
-    sw a0, 16(sp)             # store bf
-
-    # back = bf16_to_f32(bf)
-    lw a0, 16(sp)
-    jal ra, bf16_to_f32
-    sw a0, 12(sp)             # store back
-
-    # diff2 = back - val
-    la t0, CONST_1_0001
-    lw t0, 0(t0)              # val
-    lw t1, 12(sp)             # back
-    sub t2, t1, t0            # diff2 = back - val
-    sw t2, 8(sp)
-
-    # if (diff2 < 0) diff2 = -diff2
-    bltz t2, round_diff_abs
-    j round_diff_chk
-round_diff_abs:
-    neg t2, t2
-round_diff_chk:
-    la t3, CONST_0_001
-    lw t3, 0(t3)
-    bltu t2, t3, rounding_small_pass
-
-    # fail
-    la a0, msg_rounding_small_fail
-    j print_err_msg_rnd
-
-rounding_small_pass:
-
-# -------------------------------------------------------------
-# Success path
-# -------------------------------------------------------------
-    la a0, msg_rounding_done
-    li a7, 4
-    ecall
-    li a0, 0
-    j end_test_rnd
-
-# -------------------------------------------------------------
-# Error handlers
-# -------------------------------------------------------------
-rounding_exact_fail:
-    la a0, msg_rounding_exact_fail
-    j print_err_msg_rnd
-
-print_err_msg_rnd:
-    li a7, 4
-    ecall
-    li a0, 1
-    j end_test_rnd
-
-# -------------------------------------------------------------
-# End & restore
-# -------------------------------------------------------------
-end_test_rnd:
-    lw ra, 28(sp)
-    addi sp, sp, 32
-    jr ra
 ################################################
-# bf16 functions start ...
 ################################################
 # Function: bf16_isnan
 # Purpose : Determine if the input BF16 value is NaN.
@@ -1737,146 +1217,6 @@ div_end:
     or a0, a0, t3
     jr ra
 
-
-# Function: bf16_sqrt
-# Purpose : Perform sqrt(a)
-# Arguments:
-#   a0 - input value (bf16_t a)
-# Returns:
-#   a0 - sqrt result (bf16_t)
-bf16_sqrt:
-    srli a1, a0, 15 # sign
-    andi a1, a1, 1
-    srli a2, a0, 7 # exp
-    andi a2, a2, 0xFF
-    andi a3, a0, 0x7F # mant
-    # Handle special case
-    li t0, 0xFF
-    beq a2, t0, sqrt_a_inf_nan
-    bnez a2, sqrt_check_sign
-    bnez a3, sqrt_check_sign
-    j sqrt_ret_0
-sqrt_a_inf_nan:
-    bnez a3, sqrt_ret_a
-    bnez a1, sqrt_ret_nan
-    j sqrt_ret_a
-sqrt_ret_a:
-    jr ra
-sqrt_ret_nan:
-    la t0, BF16_NAN
-    lw a0, 0(t0)
-    jr ra
-sqrt_ret_0:
-    la t0, BF16_ZERO
-    lw a0, 0(t0)
-    jr ra
-sqrt_check_sign:
-    bnez a1, sqrt_ret_nan
-    beqz a2, sqrt_ret_0
-
-    la t0, BF16_EXP_BIAS
-    lw t0, 0(t0)
-    sub a4, a2, t0 # e
-    li a5, 0 # new_exp
-    ori a6, a3, 0x80 # m
-    andi t0, a4, 1
-    bnez t0, sqrt_e_odd
-    srli t1, a4, 1
-    j sqrt_start
-sqrt_e_odd:
-    slli a6, a6, 1
-    addi t0, a4, -1
-    srli t1, t0, 1
-sqrt_start:
-    la t0, BF16_EXP_BIAS
-    lw t0, 0(t0)
-    add a5, t0, t1
-
-    li t6, 90 # low
-    li t5, 256 # high
-    li t4, 128 # result
-# --------------------------------------------------------
-# Function: binary_sqrt_loop
-# Purpose : Find approximate sqrt(m) using integer binary search
-# Registers:
-#   a6 - input mantissa (m)
-#   t6 - low bound (init = 90)
-#   t5 - high bound (init = 256)
-#   t4 - result (init = 128)
-# Clobbers: t0–t3, a7
-# --------------------------------------------------------
-
-binary_sqrt_loop:
-    ble t5, t6, sqrt_done          # if low > high → done
-
-sqrt_iter:
-    add t0, t6, t5                 # t0 = low + high
-    srai t0, t0, 1                 # mid = (low + high) >> 1
-
-    # --- sq = mid * mid (manual multiply) ---
-    mv t1, t0                      # temp_mid = mid
-    mv t2, t0                      # cnt = mid
-    li t3, 0                       # sq = 0
-
-sq_loop:
-    beqz t2, sq_done               # while (cnt != 0)
-    andi a7, t2, 1
-    beqz a7, sq_skip_add
-    add t3, t3, t1                 # sq += temp_mid
-sq_skip_add:
-    slli t1, t1, 1                 # temp_mid <<= 1
-    srli t2, t2, 1                 # cnt >>= 1
-    j sq_loop
-sq_done:
-    srli t3, t3, 7                 # sq >>= 7  (divide by 128)
-
-    # --- if (sq <= m) ---
-    ble t3, a6, sqrt_take_low
-    j sqrt_take_high
-
-sqrt_take_low:
-    mv t4, t0                      # result = mid
-    addi t6, t0, 1                 # low = mid + 1
-    j sqrt_continue
-
-sqrt_take_high:
-    addi t5, t0, -1                # high = mid - 1
-
-sqrt_continue:
-    ble t6, t5, sqrt_iter          # while (low <= high)
-    j sqrt_done
-
-sqrt_done:
-    # t4 = result (approx sqrt(m))
-    li t0, 256
-    bge t4, t0, sqrt_scale_down
-    li t0, 128
-    bge t4, t0, sqrt_scale_done
-    li t1, 1
-    ble a5, t1, sqrt_scale_done
-    # while (result < 128 && new_exp > 1)
-    li t1, 1
-sq_loop_2:
-    slli t4, t4, 1
-    addi a5, a5, -1
-    bge t4, t0, sqrt_scale_done
-    ble a5, t1, sqrt_scale_done
-    j sq_loop_2
-sqrt_scale_down:
-    srli t4, t4, 1
-    addi a5, a5, 1
-sqrt_scale_done:
-    andi t3, t4, 0x7F # new_mant
-    li t0, 0xFF
-    bge a5, t0, sqrt_ret_pos_inf
-    blez a5, sqrt_ret_0
-    andi a0, a5, 0xFF
-    slli a0, a0, 7
-    or a0, a0, t3
-    jr ra
-sqrt_ret_pos_inf:
-    li a0, 0x7F80 # return +Inf
-    jr ra
 # =====================================================
 # Function: bf16_eq
 # Purpose : Check if two bf16 numbers are equal
