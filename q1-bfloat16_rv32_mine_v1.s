@@ -170,6 +170,22 @@ msg_inf_as_nan_fail:        .asciz "Infinity detected as NaN"
 msg_zero_fail:              .asciz "Zero not detected"
 msg_negzero_fail:           .asciz "Negative zero not detected"
 
+
+# --- Test cases for test_edge_cases ---
+CONST_1e_45:        .word 0x00000001     # 1e-45f
+CONST_1e_37_small:  .word 0x02081cea     # 1e-37f
+CONST_1e_38_small:  .word 0x006ce3ee     # 1e-38f
+CONST_1e38:         .word 0x7e967699     # 1e38f
+CONST_1e10:         .word 0x501502f9     # 1e10f
+CONST_10_0:         .word 0x41200000     # 10.0f
+CONST_1e_45_abs:    .word 0x00000001     # 1e-45f again (for abs check)
+# --- Messages ---
+msg_edge_cases_start:      .asciz "\nTesting edge cases...\n"
+msg_edge_cases_done:       .asciz "  Edge cases: PASS\n"
+msg_tiny_value_fail:       .asciz "Tiny value handling"
+msg_overflow_fail:         .asciz "Overflow should produce infinity"
+msg_underflow_fail:        .asciz "Underflow should produce zero or denormal"
+
 .align 2
 .text
 .globl main
@@ -189,7 +205,8 @@ main:
     or s0, s0, a0
     jal ra, test_comparisons
     or s0, s0, a0
-
+    jal ra, test_edge_cases
+    or s0, s0, a0
     beqz s0, print_pass
 print_fail:
     la a0, msg_fail
@@ -810,7 +827,178 @@ end_test_sv:
     lw ra, 0(sp)
     addi sp, sp, 4
     jr ra
-    
+
+# Function: test_edge_cases
+# Purpose : Test bf16's handling of tiny, overflow, and underflow values
+# Arguments:
+#   None
+# Returns:
+#   a0 - 0 if all tests pass, 1 if any fail
+test_edge_cases:
+    # Reserve stack: ra + 5 slots for values (t0..t4) => 6 * 4 = 24 bytes
+    addi    sp, sp, -32
+    sw      ra, 0(sp)
+    sw      zero, 4(sp)    # reserved (slot 4)  - (use as bf_tiny)
+    sw      zero, 8(sp)    # reserved (slot 8)  - (use as bf_huge)
+    sw      zero, 12(sp)   # reserved (slot 12) - (use as bf10)
+    sw      zero, 16(sp)   # reserved (slot 16) - (use as bf_huge2)
+    sw      zero, 20(sp)   # reserved (slot 20) - (use as smaller)
+    # extra 24(sp) free if needed
+
+    # print start message
+    la      a0, msg_edge_cases_start
+    li      a7, 4
+    ecall
+
+# -------------------------------------------------------------
+# Test 1: Tiny value handling (1e-45f)
+# -------------------------------------------------------------
+    # a0 = f32_to_bf16(1e-45f)  -> save to slot 4(sp)
+    la      a0, CONST_1e_45
+    lw      a0, 0(a0)
+    jal     ra, f32_to_bf16
+    sw      a0, 4(sp)            # bf_tiny <- slot 4
+
+    # bf16_iszero(bf_tiny)?
+    lw      a0, 4(sp)
+    jal     ra, bf16_iszero
+    bnez    a0, test_tiny_pass   # if zero, ok
+
+    # else: tiny_val = bf16_to_f32(bf_tiny) -> store in slot 24(sp)
+    lw      a0, 4(sp)
+    jal     ra, bf16_to_f32
+    sw      a0, 24(sp)           # tiny_val (float bits)
+
+    # abs(tiny_val)  (use t0)
+    lw      t0, 24(sp)
+    bltz    t0, tiny_abs
+    j       tiny_check
+tiny_abs:
+    neg     t0, t0
+tiny_check:
+    # compare with 1e-37f (CONST_1e_37_small)
+    la      t1, CONST_1e_37_small
+    lw      t1, 0(t1)
+    bltu    t0, t1, test_tiny_pass
+
+    # failed tiny test
+    la      a0, msg_tiny_value_fail
+    j       print_err_msg_ec
+
+test_tiny_pass:
+
+# -------------------------------------------------------------
+# Test 2: Overflow should produce infinity
+# -------------------------------------------------------------
+    # bf_huge = f32_to_bf16(1e38f) -> slot 8(sp)
+    la      a0, CONST_1e38
+    lw      a0, 0(a0)
+    jal     ra, f32_to_bf16
+    sw      a0, 8(sp)            # bf_huge
+
+    # bf10 = f32_to_bf16(10.0f) -> slot 12(sp)
+    la      a0, CONST_10_0
+    lw      a0, 0(a0)
+    jal     ra, f32_to_bf16
+    sw      a0, 12(sp)           # bf10
+
+    # bf_huge2 = bf16_mul(bf_huge, bf10) -> slot 16(sp)
+    lw      a0, 8(sp)
+    lw      a1, 12(sp)
+    jal     ra, bf16_mul
+    sw      a0, 16(sp)           # bf_huge2
+
+    # check if inf: bf16_isinf(bf_huge2)
+    lw      a0, 16(sp)
+    jal     ra, bf16_isinf
+    bnez    a0, test_overflow_pass
+
+    la      a0, msg_overflow_fail
+    j       print_err_msg_ec
+
+test_overflow_pass:
+
+# -------------------------------------------------------------
+# Test 3: Underflow should produce zero or denormal
+# -------------------------------------------------------------
+    # small = f32_to_bf16(1e-38f) -> reuse slot 8(sp)
+    la      a0, CONST_1e_38_small
+    lw      a0, 0(a0)
+    jal     ra, f32_to_bf16
+    sw      a0, 8(sp)            # small
+
+    # denom = f32_to_bf16(1e10f) -> reuse slot 12(sp)
+    la      a0, CONST_1e10
+    lw      a0, 0(a0)
+    jal     ra, f32_to_bf16
+    sw      a0, 12(sp)           # denom
+
+    # smaller = bf16_div(small, denom) -> slot 20(sp)
+    lw      a0, 8(sp)
+    lw      a1, 12(sp)
+    jal     ra, bf16_div
+    sw      a0, 20(sp)           # smaller
+
+    # if bf16_iszero(smaller) -> pass
+    lw      a0, 20(sp)
+    jal     ra, bf16_iszero
+    bnez    a0, test_underflow_pass
+
+    # else: smaller_val = bf16_to_f32(smaller) -> slot 24(sp)
+    lw      a0, 20(sp)
+    jal     ra, bf16_to_f32
+    sw      a0, 24(sp)           # smaller_val (float bits)
+
+    # abs(smaller_val) into t0
+    lw      t0, 24(sp)
+    bltz    t0, under_abs
+    j       under_check
+under_abs:
+    neg     t0, t0
+under_check:
+    # compare to 1e-45f (CONST_1e_45)
+    la      t1, CONST_1e_45
+    lw      t1, 0(t1)
+    bltu    t0, t1, test_underflow_pass
+
+    la      a0, msg_underflow_fail
+    j       print_err_msg_ec
+
+test_underflow_pass:
+
+# -------------------------------------------------------------
+# Success path
+# -------------------------------------------------------------
+    la      a0, msg_edge_cases_done
+    li      a7, 4
+    ecall
+
+    li      a0, 0
+    j       end_test_ec
+
+# -------------------------------------------------------------
+# Error printing (shared)
+# -------------------------------------------------------------
+print_err_msg_ec:
+    li      a7, 4
+    ecall
+    li      a0, 1
+    j       end_test_ec
+
+# -------------------------------------------------------------
+# End & restore
+# -------------------------------------------------------------
+end_test_ec:
+    lw      a0, 24(sp)    # restore used temp (optional)
+    lw      a1, 20(sp)
+    lw      t4, 16(sp)
+    lw      t3, 12(sp)
+    lw      t2, 8(sp)
+    lw      t1, 4(sp)
+    lw      ra, 0(sp)
+    addi    sp, sp, 32
+    jr      ra
+
 ################################################
 ################################################
 # Function: bf16_isnan
