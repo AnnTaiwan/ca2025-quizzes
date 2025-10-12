@@ -15,14 +15,14 @@ main:
     la a0, msg5 # print msg5 when passing
     li a7, 4
     ecall
-    li a7, 10         # ecall: exit
+    li a7, 93         # ecall: exit
     li a0, 0 # exit code is 0, successful
     ecall
 Not_pass:
     la a0, msg6 # print msg6 when not passing
     li a7, 4
     ecall
-    li a7, 10         # ecall: exit
+    li a7, 93         # ecall: exit
     li a0, 1 # exit code is 1, not successful
     ecall
 test:

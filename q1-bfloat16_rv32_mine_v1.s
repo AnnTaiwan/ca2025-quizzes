@@ -158,6 +158,17 @@ msg_nan_eq_fail:            .asciz "NaN equality test failed"
 msg_nan_lt_fail:            .asciz "NaN less than test failed"
 msg_nan_gt_fail:            .asciz "NaN greater than test failed"
 
+# --- Test cases for test_special_values ---
+# --- Messages ---
+msg_special_values_start:      .asciz "\nTesting special values...\n"
+msg_special_values_done:       .asciz "  Special values: PASS\n"
+msg_posinf_fail:            .asciz "Positive infinity not detected"
+msg_neginf_fail:            .asciz "Negative infinity not detected"
+msg_nan_fail:               .asciz "NaN not detected"
+msg_nan_as_inf_fail:        .asciz "NaN detected as infinity"
+msg_inf_as_nan_fail:        .asciz "Infinity detected as NaN"
+msg_zero_fail:              .asciz "Zero not detected"
+msg_negzero_fail:           .asciz "Negative zero not detected"
 
 .align 2
 .text
@@ -172,9 +183,10 @@ main:
     lw a1, 0(t0) # number of test elements
     jal ra, test_basic_conversions
     or s0, s0, a0
+    jal ra, test_special_values
+    or s0, s0, a0
     jal ra, test_arithmetic
     or s0, s0, a0
-
     jal ra, test_comparisons
     or s0, s0, a0
 
@@ -711,6 +723,94 @@ end_test_comparisons:
     lw ra, 0(sp)
     addi sp, sp, 20
     jr ra
+
+# Function: test_special_values
+# Purpose : Test bf16's special values +/-Inf or +/-0
+# Arguments:
+#   None
+# Returns:
+#   a0 - 0 if all tests pass, 1 if any fail
+test_special_values:
+    addi sp, sp, -4
+    sw ra, 0(sp)
+    la a0, msg_special_values_start
+    li a7, 4
+    ecall
+
+    la a0, BF16_INF
+    lw a0, 0(a0)
+    jal ra, bf16_isinf
+    beqz a0, print_msg_posinf_fail
+    la a0, BF16_INF
+    lw a0, 0(a0)
+    jal ra, bf16_isnan
+    bnez a0, print_msg_inf_as_nan_fail
+
+    li t0, 1
+    slli t0, t0, 15
+    la a0, BF16_INF
+    lw a0, 0(a0)
+    or a0, a0, t0 # -Inf
+    jal ra, bf16_isinf
+    beqz a0, print_msg_neginf_fail
+
+    la a0, BF16_NAN
+    lw a0, 0(a0)
+    jal ra, bf16_isnan
+    beqz a0, print_msg_nan_fail
+    la a0, BF16_NAN
+    lw a0, 0(a0)
+    jal ra, bf16_isinf
+    bnez a0, print_msg_nan_as_inf_fail
+
+    li a0, 0
+    jal ra, f32_to_bf16
+    jal ra, bf16_iszero
+    beqz a0, print_msg_zero_fail
+    
+    li a0, 1
+    slli a0, a0, 15
+    jal ra, f32_to_bf16
+    jal ra, bf16_iszero
+    beqz a0, print_msg_negzero_fail
+
+    # success
+    la a0, msg_special_values_done
+    li a7, 4
+    ecall
+    li a0, 0 # return 0
+    j end_test_sv
+print_msg_posinf_fail:
+    la a0, msg_posinf_fail 
+    j print_err_msg_sv
+print_msg_neginf_fail:
+    la a0, msg_neginf_fail 
+    j print_err_msg_sv
+print_msg_nan_fail:
+    la a0, msg_nan_fail 
+    j print_err_msg_sv
+print_msg_nan_as_inf_fail:
+    la a0, msg_nan_as_inf_fail 
+    j print_err_msg_sv
+print_msg_inf_as_nan_fail:
+    la a0, msg_inf_as_nan_fail 
+    j print_err_msg_sv
+print_msg_zero_fail:
+    la a0, msg_zero_fail 
+    j print_err_msg_sv
+print_msg_negzero_fail:
+    la a0, msg_negzero_fail 
+    j print_err_msg_sv
+print_err_msg_sv:
+    li a7, 4
+    ecall
+    li a0, 1 # return 1
+    j end_test_sv
+end_test_sv:
+    lw ra, 0(sp)
+    addi sp, sp, 4
+    jr ra
+    
 ################################################
 ################################################
 # Function: bf16_isnan
